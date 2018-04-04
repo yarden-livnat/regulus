@@ -26,6 +26,7 @@ def clean(params):
     for key, value in defaults.items():
         print('clean', key, params[key], defaults[key])
         if params[key] == value:
+            print('remove', key)
             del params[key]
     return params
 
@@ -45,7 +46,7 @@ def morse(regulus, kind='smale', measures=None, args=None, debug=False):
         try:
             print('\npost ', measure)
             prev = rf.params(regulus, measure)
-            current = merge(params, prev)
+            current = merge(merge(args, prev), defaults)
 
             y = pts[:, ndims + i]
             msc = MSC(current['graph'], current['gradient'], current['knn'], current['beta'], current['norm'], aggregator='mean')  # connect=True

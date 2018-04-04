@@ -29,7 +29,7 @@ def from_csv(filename, name=None, ndims=-1, sample_method=DEFAULT_SAMPLE_METHOD,
             'sample_method': sample_method,
             'pts': data,
             'morse': {
-                'params': "",
+                'params': {},
                 'complexes': {}
             }
         }
@@ -74,7 +74,7 @@ def params(regulus, measure=None):
         return regulus['morse']['params']
     if measure in regulus['morse']['complexes']:
         return regulus['morse']['complexes'][measure]['params']
-    return ""
+    return {}
 
 
 def verify(regulus):

@@ -30,7 +30,8 @@ setup(
     entry_points = {
         'console_scripts': [
             'regulus=regulus.main:main',
-            'morse=regulus.morse.main:run'
+            'morse=regulus.morse.main:run',
+            'info=regulus.info:info',
         ],
     }
 )
