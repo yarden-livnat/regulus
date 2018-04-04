@@ -7,7 +7,7 @@ from .morse import morse
 
 def parse_args(args=None):
     p = argparse.ArgumentParser(prog='morse', description='compute Morse (or Morse-Smale complex')
-    p.add_argument('filename', help='input file [.csv data file or a regulus .json file]')
+    p.add_argument('filename', help='regulus .json file]')
 
     p.add_argument('-k', '--knn', type=int, help='knn')
     p.add_argument('-b', '--beta', type=float, help='beta')
