@@ -5,6 +5,17 @@ from pathlib import Path
 from regulus import file as rf
 
 
+def copy_morse(morse):
+    obj = {'params': morse['params'], 'complexes': {}}
+    for name, mc in morse['complexes'].items():
+        obj['complexes'][name] = {
+            'type': mc['type'],
+            'params': mc['params'],
+            'partitions': len(mc['partitions'])
+        }
+    return obj
+
+
 def info():
     p = argparse.ArgumentParser()
     p.add_argument('filename', help='input file')
@@ -12,6 +23,9 @@ def info():
     p.add_argument('-d', '--dims', action='store_true', help='dimensions')
     p.add_argument('-m', '--measures', action='store_true', help='measures')
     p.add_argument('-p', '--params', action='store_true', help='params')
+
+    p.add_argument('-P', '--pp', action='store_true', help='pretty print')
+    p.add_argument('-S', '--short', action='store_true', help='pretty print (short)')
 
     p.add_argument('-o', '--out', help='output file')
 
@@ -40,6 +54,20 @@ def info():
         print('global: {}'.format(morse['params']))
         for name, mc in morse['complexes'].items():
             print('{}: type:{} params:{}'.format(name, mc['type'], mc['params']))
+
+    if ns.pp:
+        print(json.dumps(regulus,indent=2))
+
+    if ns.short:
+        short = {}
+        for key, value in regulus.items():
+            if key == 'pts':
+                short['pts'] = len(value)
+            elif key == 'morse':
+                short['morse'] = copy_morse(value)
+            else:
+                short[key] = value
+        print(json.dumps(short, indent=2))
 
 
 if __name__ == "__main__":
