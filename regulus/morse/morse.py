@@ -22,18 +22,7 @@ def merge(src, default):
     return dest
 
 
-def clean(params):
-    for key, value in defaults.items():
-        print('clean', key, params[key], defaults[key])
-        if params[key] == value:
-            print('remove', key)
-            del params[key]
-    return params
-
-
 def morse(regulus, kind='smale', measures=None, args=None, debug=False):
-
-    params = merge(args, defaults)
 
     ndims = len(regulus['dims'])
     if measures is None:
@@ -46,7 +35,8 @@ def morse(regulus, kind='smale', measures=None, args=None, debug=False):
         try:
             print('\npost ', measure)
             prev = rf.params(regulus, measure)
-            current = merge(merge(args, prev), defaults)
+            params = merge(args, prev)
+            current = merge(params, defaults)
 
             y = pts[:, ndims + i]
             msc = MSC(current['graph'], current['gradient'], current['knn'], current['beta'], current['norm'], aggregator='mean')  # connect=True
@@ -65,7 +55,7 @@ def morse(regulus, kind='smale', measures=None, args=None, debug=False):
 
             mc = post.build().verify().get_tree(measure)
             mc['type'] = kind
-            mc['params'] = clean(current)
+            mc['params'] = params
             regulus['morse']['complexes'][measure] = mc
 
         except RuntimeError as error:

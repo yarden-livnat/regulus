@@ -67,6 +67,7 @@ def remove_duplicates(regulus, force=False):
     y = pts[:, n:]
     x, y = TopologicalObject.aggregate_duplicates(x, y)
     regulus['pts'] = np.concatenate((x, y), axis=1).tolist()
+    regulus['attr']['validated'] = True
 
 
 def params(regulus, measure=None):
