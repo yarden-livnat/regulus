@@ -1,6 +1,7 @@
 import numpy as np
 from regulus.math.linearregression import linearregression
 from regulus.math.pca import pca
+from regulus.math.inversekernelregression import inversekernelregression
 
 defaults = {
     'linear_reg': {
@@ -10,6 +11,10 @@ defaults = {
     'pca': {
         'method': pca,
         'args': 2
+    },
+    'inverse_kernel_regression': {
+        'method': inversekernelregression,
+        'args': None
     }
 }
 
@@ -42,12 +47,12 @@ def update_partition(partition, idx, pts, ndims, measure_ind, spec):
     x = data[:, 0:ndims]
     y = data[:, ndims + measure_ind]
 
-    model = calc_model(x, y, spec)
+    model = compute_model(x, y, spec)
 
     partition['model'] = model
 
 
-def calc_model(x, y, spec):
+def compute_model(x, y, spec):
     model = {}
 
     for method in spec.keys():
