@@ -41,7 +41,7 @@ def morse(regulus, kind=None, measures=None, args=None, debug=False):
 
             current = merge(params, defaults)
             y = pts[:, ndims + i]
-            print(current)
+
             msc = MSC(current['graph'], current['gradient'], current['knn'], current['beta'], current['norm'],
                       aggregator='mean')  # connect=True
             msc.build(X=x, Y=y, names=regulus['dims'] + [measure])
