@@ -4,15 +4,6 @@ from regulus.morse.morse import morse
 from regulus.math.process import process
 
 
-def decode2(param):
-    keys = list(re.split(r'-', param))  # .remove('')
-    keys.remove('')
-    for i in range(len(keys)):
-        keys[i] = '-' + keys[i]
-
-    return keys
-
-
 def update_params(reg, spec):
     reg.name = spec["name"]
     reg.version = spec["new_version"]
@@ -30,7 +21,7 @@ def update_params(reg, spec):
     return newparam
 
 
-def compute(spec, data_dir):
+def update_topo(spec, data_dir):
     regulus = get(spec=spec, dir=data_dir)
     param = update_params(regulus, spec)
 

@@ -7,7 +7,7 @@ from getpass import getuser
 DEFAULT_SAMPLE_METHOD = 'Predictor'
 
 
-def from_csv(filename, ndims=-1, name=None,  sample_method=DEFAULT_SAMPLE_METHOD, duplicates=True):
+def from_csv(filename, ndims=-1, name=None, sample_method=DEFAULT_SAMPLE_METHOD, duplicates=True):
     with open(filename) as f:
         reader = csv.reader(f)
         header = next(reader)
@@ -47,7 +47,7 @@ def load(filename):
         return regulus
 
 
-def get(spec = None, version = None, name = None, dir = None):
+def get(spec=None, version=None, name=None, dir=None):
     if dir is not None:
         cur_dir = dir
     else:
@@ -57,15 +57,15 @@ def get(spec = None, version = None, name = None, dir = None):
         # spec is the file from
         name = spec['name']
         version = spec['version']
-        get(name = name, version = version, dir = cur_dir)
+        get(name=name, version=version, dir=cur_dir)
 
     else:
 
-        if (cur_dir / (name +'.'+ version + '.json')).exists():
-            regulus = load(cur_dir/(name + '.'+ version + '.json'))
+        if (cur_dir / (name + '.' + version + '.json')).exists():
+            regulus = load(cur_dir / (name + '.' + version + '.json'))
 
-        elif (cur_dir/(name +'.json')).exists():
-            regulus = load(cur_dir/(name + '.json'))
+        elif (cur_dir / (name + '.json')).exists():
+            regulus = load(cur_dir / (name + '.json'))
 
         else:
             print("Can not find old regulus file")
@@ -73,12 +73,12 @@ def get(spec = None, version = None, name = None, dir = None):
     return regulus
 
 
-def save(regulus, filename=None, dir = None):
+def save(regulus, filename=None, dir=None):
     if filename is None:
         filename = regulus['attr']['path']
 
     with open(filename, 'w') as f:
-        json.dump(regulus, f, indent = 2)
+        json.dump(regulus, f, indent=2)
 
 
 def remove_duplicates(regulus, force=False):
@@ -116,9 +116,7 @@ def verify(regulus):
     if 'path' not in attr:
         # Changed to store version
         # attr['path'] = regulus['name']+'.json'
-        attr['path'] = regulus['name']+regulus['version']+'.json'
-
+        attr['path'] = regulus['name'] + regulus['version'] + '.json'
 
     if 'sample_method' not in regulus:
         regulus['sample_method'] = DEFAULT_SAMPLE_METHOD
-

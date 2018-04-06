@@ -1,4 +1,3 @@
-import json
 import numpy as np
 from regulus.math.linearregression import linearregression
 from regulus.math.pca import pca
@@ -13,12 +12,6 @@ defaults = {
         'args': 2
     }
 }
-
-
-def load_file(file):
-    with open(file) as json_data:
-        data = json.load(json_data)
-        return data
 
 
 def update_regulus(regulus, spec):
@@ -49,12 +42,12 @@ def update_partition(partition, idx, pts, ndims, measure_ind, spec):
     x = data[:, 0:ndims]
     y = data[:, ndims + measure_ind]
 
-    model = calc(x, y, spec)
+    model = calc_model(x, y, spec)
 
     partition['model'] = model
 
 
-def calc(x, y, spec):
+def calc_model(x, y, spec):
     model = {}
 
     for method in spec.keys():
@@ -65,19 +58,8 @@ def calc(x, y, spec):
     return model
 
 
-def process(filename, spec=None, output=None):
-    if output is None:
-        output = filename
-
+def process(regulus, spec=None):
     if spec is None:
         spec = defaults
-    if isinstance(filename, str):
-        regulus = load_file(filename)
-    else:
-        regulus = filename
-    # calc_regression(regulus["mscs"], regulus["pts"], len(regulus["dims"]))
-    update_regulus(regulus, spec)
 
-    if isinstance(filename, str):
-        with open(output, 'w') as outfile:
-            json.dump(regulus, outfile)
+    update_regulus(regulus, spec)

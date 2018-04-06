@@ -61,18 +61,20 @@ def post_process(regulus, data_dir):
         return 1
 
 
-# resample function
-def resample2(spec, data_dir, sim_dir, sim_in, sim_out):
+def sample_pts(spec, data_dir, sim_dir, sim_in, sim_out):
     regulus = get(spec=spec, dir=data_dir)
     newsamples = sample(regulus, spec, sim_dir, sim_in, sim_out)
+    return [regulus, newsamples]
+
+
+def get_newreg(spec, data_dir, sim_dir, sim_in, sim_out):
+    [regulus, newsamples] = sample_pts(spec, data_dir, sim_dir, sim_in, sim_out)
     regulus = add_pts(regulus, newsamples)
     return post_process(regulus, data_dir)
 
 
-# validate function
 def get_sample(spec, data_dir, sim_dir, sim_in, sim_out):
-    regulus = get(spec=spec, dir=data_dir)
-    newsamples = sample(regulus, spec, sim_dir, sim_in, sim_out)
+    [regulus, newsamples] = sample_pts(spec, data_dir, sim_dir, sim_in, sim_out)
     dims = regulus['dims']
     measures = regulus['measures']
     return pts2json(newsamples, dims, measures)

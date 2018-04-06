@@ -2,10 +2,10 @@ import subprocess
 import csv
 import numpy as np
 
-import testfun
-from Predictor import Predictor
-from ackley import calc_ackley
-from Hartmann import calc_Hartmann
+import regulus.resample.testfun as testfun
+from regulus.resample.Predictor import Predictor
+from regulus.resample.ackley import calc_ackley
+from regulus.resample.Hartmann import calc_Hartmann
 
 
 def resample(sample_input, regulus, sim_dir, sim_in, sim_out):
