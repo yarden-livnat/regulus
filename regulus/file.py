@@ -7,7 +7,7 @@ from getpass import getuser
 DEFAULT_SAMPLE_METHOD = 'Predictor'
 
 
-def from_csv(filename, ndims=-1, name=None, sample_method=DEFAULT_SAMPLE_METHOD, duplicates=True):
+def from_csv(filename, ndims=-1, sample_method=DEFAULT_SAMPLE_METHOD, name=None, duplicates=True):
     with open(filename) as f:
         reader = csv.reader(f)
         header = next(reader)
@@ -57,20 +57,23 @@ def get(spec=None, version=None, name=None, dir=None):
         # spec is the file from
         name = spec['name']
         version = spec['version']
-        get(name=name, version=version, dir=cur_dir)
+        return get(name=name, version=version, dir=cur_dir)
 
     else:
 
         if (cur_dir / (name + '.' + version + '.json')).exists():
             regulus = load(cur_dir / (name + '.' + version + '.json'))
+            return regulus
+
 
         elif (cur_dir / (name + '.json')).exists():
             regulus = load(cur_dir / (name + '.json'))
+            return regulus
+
 
         else:
             print("Can not find old regulus file")
-
-    return regulus
+            exit(255)
 
 
 def save(regulus, filename=None, dir=None):

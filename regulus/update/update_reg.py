@@ -1,11 +1,4 @@
-import shutil
-from regulus.file import get, save
-from regulus.morse.morse import morse
-from regulus.math.process import process
-from regulus.resample.resample import resample
-
-
-# Used for validation
+#  Convert pts list to pt objects
 def pts2json(pts, dims, measures):
     out = []
     for pt in pts:
@@ -21,7 +14,7 @@ def pts2json(pts, dims, measures):
     return out
 
 
-# Dict to list
+# Convert pts objects to pts list
 def dict2list(data, dims):
     new_sample_input = [[ptdict[inputdim] for inputdim in dims] for ptdict in data]
     print("NEW_SAMPLE_INPUT", new_sample_input)
@@ -30,11 +23,17 @@ def dict2list(data, dims):
 
 # resample with spec
 def sample(regulus, spec, sim_dir, sim_in, sim_out):
+    import shutil
+    from pathlib import Path
+    from regulus.resample.resample import resample
+
     dims = regulus['dims']
     new_inputs = dict2list(spec['pts'], dims)
     result = resample(new_inputs, regulus, sim_dir, sim_in, sim_out)  # run_simulation(new_inputs, regulus)
 
-    shutil.rmtree(sim_dir)
+    path = Path(sim_dir)
+    if path.exists():
+        shutil.rmtree(sim_dir)
     return result
 
 
@@ -45,10 +44,12 @@ def add_pts(regulus, pts):
 
 # calculate MSC, linear_reg, pca
 def post_process(regulus, data_dir):
+    from regulus.math.process import process
+    from regulus.morse.morse import morse
+    from regulus.file import save
+
     try:
-
         morse(regulus)
-
         process(regulus)
 
         # Might be changed later
@@ -62,6 +63,8 @@ def post_process(regulus, data_dir):
 
 
 def sample_pts(spec, data_dir, sim_dir, sim_in, sim_out):
+    from regulus.file import get
+
     regulus = get(spec=spec, dir=data_dir)
     newsamples = sample(regulus, spec, sim_dir, sim_in, sim_out)
     return [regulus, newsamples]

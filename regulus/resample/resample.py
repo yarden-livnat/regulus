@@ -1,16 +1,14 @@
-import subprocess
 import csv
 import numpy as np
 
-import regulus.resample.testfun as testfun
-from regulus.resample.Predictor import Predictor
-from regulus.resample.ackley import calc_ackley
-from regulus.resample.Hartmann import calc_Hartmann
-
 
 def resample(sample_input, regulus, sim_dir, sim_in, sim_out):
-    sim_method = regulus['sim_method']
+    sim_method = regulus['sample_method']
+
     if sim_method == 'deployment':
+
+        import subprocess
+
         save_samples(sample_input, (sim_dir + '/' + sim_in))
         subprocess.run(
             ['python', '-m', 'scenario', '-t', 'Transition_scenario.xml', '-o', sim_dir, '-p', (sim_dir + '/' + sim_in),
@@ -25,11 +23,17 @@ def resample(sample_input, regulus, sim_dir, sim_in, sim_out):
 
 
     elif sim_method == 'test':
+
+        import regulus.resample.testfun as testfun
+
         new_input = testfun.load_input(sample_input)
         new_data = testfun.generateres(new_input)
         return new_data
 
     elif 'pnnl' in sim_method.lower():
+
+        from regulus.resample.Predictor import Predictor
+
         data = np.array(regulus['pts'])
         X = data[:, :-1]
         y = data[:, -1]
@@ -39,13 +43,31 @@ def resample(sample_input, regulus, sim_dir, sim_in, sim_out):
 
 
     elif 'ackley' in sim_method.lower():
+
+        from regulus.resample.ackley import calc_ackley
+
         out = calc_ackley(sample_input)
         return out
 
 
     elif 'hart' in sim_method.lower():
+
+        from regulus.resample.Hartmann import calc_Hartmann
+
         out = calc_Hartmann(sample_input)
         return out
+
+
+    elif 'pred' in sim_method.lower():
+
+        from regulus.resample.Predictor import Predictor
+
+        data = np.array(regulus['pts'])
+        X = data[:, :-1]
+        y = data[:, -1]
+        model = Predictor(X, y)
+        new_data = model.predict(sample_input)
+        return new_data
 
 
     else:

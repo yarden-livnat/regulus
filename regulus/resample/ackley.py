@@ -66,10 +66,6 @@ def saveackley(filename, data):
 
 
 if __name__ == '__main__':
-    # filename ,dim, num
-    # if len(argv)>3:
-    #    linear_fit(argv[1],argv[2])
-    # else:
-    #    linear_fit(argv[1])
+
     data = create(argv[2], argv[3])
     saveackley(argv[1], data)
