@@ -1,3 +1,6 @@
+
+
+
 #  Convert pts list to pt objects
 def pts2json(pts, dims, measures):
     out = []
@@ -22,10 +25,14 @@ def dict2list(data, dims):
 
 
 # resample with spec
-def sample(regulus, spec, sim_dir, sim_in, sim_out):
+def sample(regulus, spec, data_dir):
     import shutil
     from pathlib import Path
     from regulus.resample.resample import resample
+
+    sim_dir = str(data_dir/'temp')
+    sim_out = 'new_sample_outputs.csv'
+    sim_in = 'new_sample_inputs.csv'
 
     dims = regulus['dims']
     new_inputs = dict2list(spec['pts'], dims)
@@ -43,7 +50,7 @@ def add_pts(regulus, pts):
 
 
 # calculate MSC, linear_reg, pca
-def post_process(regulus, data_dir):
+def post_process(regulus, data_dir = None, outfile = None):
     from regulus.math.process import process
     from regulus.morse.morse import morse
     from regulus.file import save
@@ -52,8 +59,8 @@ def post_process(regulus, data_dir):
         morse(regulus)
         process(regulus)
 
-        # Might be changed later
-        save(regulus)
+        # Might be changed later due to data_dir
+        save(regulus, filename = outfile, dir = data_dir)
         return 0
 
     except Exception as e:
@@ -62,26 +69,47 @@ def post_process(regulus, data_dir):
         return 1
 
 
-def sample_pts(spec, data_dir, sim_dir, sim_in, sim_out):
+def sample_pts(spec, data_dir):
     from regulus.file import get
 
     regulus = get(spec=spec, dir=data_dir)
-    newsamples = sample(regulus, spec, sim_dir, sim_in, sim_out)
+    newsamples = sample(regulus, spec, data_dir)
     return [regulus, newsamples]
 
 
-def get_newreg(spec, data_dir, sim_dir, sim_in, sim_out):
-    [regulus, newsamples] = sample_pts(spec, data_dir, sim_dir, sim_in, sim_out)
+def get_newreg(spec, data_dir = None, filename = None):
+    [regulus, newsamples] = sample_pts(spec, data_dir)
     regulus = add_pts(regulus, newsamples)
-    return post_process(regulus, data_dir)
+    return post_process(regulus, data_dir, filename)
 
 
-def get_sample(spec, data_dir, sim_dir, sim_in, sim_out):
-    [regulus, newsamples] = sample_pts(spec, data_dir, sim_dir, sim_in, sim_out)
+def get_sample(spec, data_dir):
+    [regulus, newsamples] = sample_pts(spec, data_dir)
     dims = regulus['dims']
     measures = regulus['measures']
     return pts2json(newsamples, dims, measures)
 
+def get_newreg_with_spec():
+    from pathlib import  Path
+    import argparse
+
+    import json
+
+    p = argparse.ArgumentParser()
+    p.add_argument('specname', help='regulus spec .json file]')
+    p.add_argument('-o', '--out', help='output file')
+    p.add_argument('-d', '--dir', help='regulus.json file dir')
+    p.add_argument('--debug', action='store_true', help='compute with all models')
+
+    ns = p.parse_args()
+
+    with open(ns.specname) as f:
+        spec = json.load(f)
+
+    data_dir = Path(ns.dir) if ns.dir is not None else spec.parent
+
+    return get_newreg(spec, data_dir, ns.out)
 
 if __name__ == '__main__':
-    pass
+    #pass
+    get_newreg_with_spec()
