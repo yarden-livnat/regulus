@@ -95,7 +95,7 @@ def get_newreg_with_spec():
     import json
 
     p = argparse.ArgumentParser()
-    p.add_argument('specname', help='regulus spec .json file]')
+    p.add_argument('specname', help='new sample spec .json file]')
     p.add_argument('-o', '--out', help='output file')
     p.add_argument('-d', '--dir', help='regulus.json file dir')
     p.add_argument('--debug', action='store_true', help='compute with all models')

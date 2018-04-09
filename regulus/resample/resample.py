@@ -100,7 +100,7 @@ def resample_cli():
     import csv
 
     p = argparse.ArgumentParser()
-    p.add_argument('samplefile', help='regulus spec .json file]')
+    p.add_argument('samplefile', help='new sample csv file]')
     p.add_argument('-r', '--reg', help='regulus.json file')
 
     p.add_argument('-o', '--out', help='output file')

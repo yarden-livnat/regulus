@@ -27,11 +27,14 @@ setup(
     ],
     test_suite='nose.collector',
     tests_require=['nose'],
-    entry_points = {
+    entry_points={
         'console_scripts': [
             'regulus=regulus.main:main',
             'morse=regulus.morse.main:run',
             'info=regulus.info:info',
+            'resample = regulus.resample.resample:resample_cli',
+            'compute = regulus.math.process:process_cli',
+
         ],
     }
 )
