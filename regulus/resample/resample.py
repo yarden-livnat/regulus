@@ -63,16 +63,22 @@ def resample(sample_input, regulus, sim_dir=None, sim_in=None, sim_out=None):
         return out
 
 
-    elif 'pred' in sim_method.lower():
+    elif 'predictor' in sim_method.lower():
 
-        from regulus.resample.Predictor import Predictor
+        from regulus.resample.model import Predictor
 
         data = np.array(regulus['pts'])
         X = data[:, :-1]
         y = data[:, -1]
         model = Predictor(X, y)
         new_data = model.predict(sample_input)
-        return new_data
+
+        out = []
+
+        for i in range(len(sample_input)):
+            y = new_data[i]
+            out.append(sample_input[i] + [y])
+        return out
 
 
     else:

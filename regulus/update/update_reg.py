@@ -1,6 +1,3 @@
-
-
-
 #  Convert pts list to pt objects
 def pts2json(pts, dims, measures):
     out = []
@@ -30,7 +27,7 @@ def sample(regulus, spec, data_dir):
     from pathlib import Path
     from regulus.resample.resample import resample
 
-    sim_dir = str(data_dir/'temp')
+    sim_dir = str(data_dir / 'temp')
     sim_out = 'new_sample_outputs.csv'
     sim_in = 'new_sample_inputs.csv'
 
@@ -50,17 +47,18 @@ def add_pts(regulus, pts):
 
 
 # calculate MSC, linear_reg, pca
-def post_process(regulus, data_dir = None, outfile = None):
+def post_process(regulus, data_dir=None, outfile=None):
     from regulus.math.process import process
     from regulus.morse.morse import morse
     from regulus.file import save
 
     try:
         morse(regulus)
+
         process(regulus)
 
         # Might be changed later due to data_dir
-        save(regulus, filename = outfile, dir = data_dir)
+        save(regulus, filename=outfile, dir=data_dir)
         return 0
 
     except Exception as e:
@@ -77,7 +75,7 @@ def sample_pts(spec, data_dir):
     return [regulus, newsamples]
 
 
-def get_newreg(spec, data_dir = None, filename = None):
+def get_newreg(spec, data_dir=None, filename=None):
     [regulus, newsamples] = sample_pts(spec, data_dir)
     regulus = add_pts(regulus, newsamples)
     return post_process(regulus, data_dir, filename)
@@ -89,8 +87,9 @@ def get_sample(spec, data_dir):
     measures = regulus['measures']
     return pts2json(newsamples, dims, measures)
 
+
 def get_newreg_with_spec():
-    from pathlib import  Path
+    from pathlib import Path
     import argparse
 
     import json
@@ -110,6 +109,7 @@ def get_newreg_with_spec():
 
     return get_newreg(spec, data_dir, ns.out)
 
+
 if __name__ == '__main__':
-    #pass
+    # pass
     get_newreg_with_spec()
