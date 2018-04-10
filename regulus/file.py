@@ -47,36 +47,10 @@ def load(filename):
         return regulus
 
 
-def get(spec=None, version=None, name=None, dir=None):
-    if dir is not None:
-        cur_dir = dir
-    else:
-        cur_dir = Path('.')
-
-    if spec is not None:
-        # spec is the file from
-        name = spec['name']
-        version = spec['version']
-        return get(name=name, version=version, dir=cur_dir)
-
-    else:
-
-        if (cur_dir / (name + '.' + version + '.json')).exists():
-            regulus = load(cur_dir / (name + '.' + version + '.json'))
-            return regulus
 
 
-        elif (cur_dir / (name + '.json')).exists():
-            regulus = load(cur_dir / (name + '.json'))
-            return regulus
 
-
-        else:
-            print("Can not find old regulus file")
-            exit(255)
-
-
-def save(regulus, filename=None, dir=None):
+def save(regulus, filename=None, data_dir=None):
     if filename is None:
         filename = regulus['attr']['path']
 

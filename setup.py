@@ -32,8 +32,10 @@ setup(
             'regulus=regulus.main:main',
             'morse=regulus.morse.main:run',
             'info=regulus.info:info',
-            'resample = regulus.resample.resample:resample_cli',
-            'compute = regulus.math.process:process_cli',
+            'resample = regulus.resample.resample_cli:resample_cli',
+            'model = regulus.update.update_model_cli:update_model_cli',
+            'refine = regulus.update.refine_topo_cli:refine_topo_cli',
+            'recompute = regulus.update.recompute_topo_cli:recompute_topo_cli',
 
         ],
     }

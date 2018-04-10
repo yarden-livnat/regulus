@@ -2,27 +2,42 @@ import csv
 import numpy as np
 
 
-def resample(sample_input, regulus, sim_dir=None, sim_in=None, sim_out=None):
+def resample(sample_input, regulus):
     sim_method = regulus['sample_method']
-
-    if sim_dir is None:
-        sim_dir = 'temp'
-        sim_out = 'new_sample_outputs.csv'
-        sim_in = 'new_sample_inputs.csv'
 
     if sim_method == 'deployment':
 
+        import tempfile
         import subprocess
+        import shutil
+        import os
+        from pathlib import Path
 
-        save_samples(sample_input, (sim_dir + '/' + sim_in))
+        # Temporary sim_input file
+        [f, sim_in] = tempfile.mkstemp(suffix='.csv', prefix=None, dir=None, text=False)
+        os.close(f)
+        save_samples(sample_input, sim_in)
+
+        # Temporary sim_dir file
+        sim_dir = tempfile.mkstemp(suffix=None, prefix=None, dir=None)
+        # Temporary sim_out file
+        sim_out = 'out.csv'
+
         subprocess.run(
-            ['python', '-m', 'scenario', '-t', 'Transition_scenario.xml', '-o', sim_dir, '-p', (sim_dir + '/' + sim_in),
+            ['python', '-m', 'scenario', '-t', 'Transition_scenario.xml', '-o', sim_dir, '-p', sim_in,
              '-r', sim_out], check=True)
 
         with open(sim_dir + '/' + sim_out, newline='') as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
             header = next(reader)
             data = [[float(x) for x in row] for row in reader]
+
+        # Remove temp files / dirs
+        Path(sim_in).unlink()
+
+        path = Path(sim_dir)
+        if path.exists():
+            shutil.rmtree(sim_dir)
 
         return data
 
@@ -93,57 +108,4 @@ def save_samples(data, filename):
         report.writerows(data)
 
 
-def resample_cli():
-    from pathlib import Path
-    import argparse
-    import json
-    import csv
 
-    p = argparse.ArgumentParser()
-    p.add_argument('samplefile', help='new sample csv file]')
-    p.add_argument('-r', '--reg', help='regulus.json file')
-
-    p.add_argument('-o', '--out', help='output file')
-
-    p.add_argument('--csv', help='save as csv file')
-    p.add_argument('--json', help='save as regulus file')
-    p.add_argument('--debug', action='store_true', help='compute with all models')
-
-    ns = p.parse_args()
-
-    with open(ns.reg) as reg:
-        regulus = json.load(reg)
-
-    dims = regulus['dims']
-    measures = regulus['measures']
-
-    with open(ns.samplefile) as csvfile:
-        reader = csv.reader(csvfile, delimiter=',')
-        header = next(reader)
-        sample_input = [[float(x) for x in row[0:len(dims)]] for row in reader]
-
-    pts = resample(sample_input, regulus)
-
-    header = dims + measures
-
-    if ns.csv:
-        with open(ns.out, 'w', newline='') as f:
-            report = csv.writer(f, delimiter=',')
-            report.writerow(header)
-            report.writerows(pts)
-
-    if ns.json:
-        regulus['pts'] = regulus['pts'] + pts
-
-        if ns.out is None:
-
-            with open(ns.reg, 'w') as f:
-                json.dump(regulus, f, indent=2)
-        else:
-            with open(ns.out, 'w') as f:
-                json.dump(regulus, f, indent=2)
-
-
-if __name__ == '__main__':
-    # pass
-    resample_cli()

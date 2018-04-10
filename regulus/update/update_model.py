@@ -1,7 +1,7 @@
 import numpy as np
-from regulus.math.linearregression import linearregression
+from regulus.math.linear_reg import linearregression
 from regulus.math.pca import pca
-from regulus.math.inversekernelregression import inversekernelregression
+from regulus.math.inv_kernel_reg import inversekernelregression
 
 from regulus import file as rf
 
@@ -32,11 +32,11 @@ def update_regulus(regulus, spec):
 
 
 def update_msc(msc, pts, ndims, measure_ind, spec):
-    if 'pts_idx' not in msc:
-        print('ignored')
-    for partition in msc["partitions"]:
-        update_partition(partition, msc['pts_idx'], pts, ndims, measure_ind, spec)
-
+    try:
+        for partition in msc["partitions"]:
+            update_partition(partition, msc['pts_idx'], pts, ndims, measure_ind, spec)
+    except Exception as e:
+        print(e)
 
 def update_partition(partition, idx, pts, ndims, measure_ind, spec):
     span = partition["span"]
@@ -65,43 +65,10 @@ def compute_model(x, y, spec):
     return model
 
 
-def process(regulus, spec=None):
+def update_model(regulus, spec=None):
     if spec is None:
         spec = defaults
 
     update_regulus(regulus, spec)
 
 
-def process_cli():
-    import argparse
-    import json
-
-    p = argparse.ArgumentParser()
-    p.add_argument('filename', help='regulus .json file]')
-    p.add_argument('-o', '--out', help='output file')
-    p.add_argument('--debug', action='store_true', help='compute with all models')
-    p.add_argument('-s', '--spec', help='process spec file')
-
-    ns = p.parse_args()
-
-    regulus = rf.load(ns.filename)
-
-    if ns.spec is None:
-        spec = defaults
-    else:
-        with open(ns.spec) as f:
-            spec = json.load(f)
-    try:
-        process(regulus, spec)
-
-        filename = ns.out if ns.out is not None else ns.filename
-
-        rf.save(regulus, filename)
-
-    except Exception as e:
-        print(e)
-        return 1
-
-
-if __name__ == "__main__":
-    process_cli()

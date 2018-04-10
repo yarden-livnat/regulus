@@ -12,7 +12,7 @@ Command line programs
 ### regulus
 creates a regulus json file from a set of points (csv file with header)
 
-`regulus --cvs <file.csv> [-d <n>] [-h | --help]`
+`regulus --csv <file.csv> [-d <n>] [-h | --help]`
 
 
 ### info
@@ -28,12 +28,22 @@ the measures in a regulus file
 [-G|--gradient <name>] [-o|--out <output.json] filename.json` 
 
 
- ### resample
+### resample
 Resample with new sample input csv file for one or more of the measures with the sample_method in a regulus file 
 
 `resample input.csv   [-r | --reg <regulus.json>] [-o|--out <output file] --csv save as csv --json save as regulus.json [-h | --help]`
 
-### compute
+### model
 Compute mathematical models for all partitions for all measures in a regulus file
 
-`compute regulus.json  [-s | --spec <spec.json>] [-o|--out <output file] [-h | --help]`
+`model regulus.json  [-s | --spec <spec.json>] [-o|--out <output file] [-h | --help]`
+
+### recompute
+Recompute topology in a regulus file based on a spec file of parameters
+
+`recompute spec.json  [-o | --out <output file>] [-d|--dir <regulus file directory>] [-h | --help]`
+
+### refine
+Refine topology in a regulus file based on a spec file of new samples
+
+`refine spec.json  [-o | --out <output file>] [-d|--dir <regulus file directory>] [-h | --help]`
