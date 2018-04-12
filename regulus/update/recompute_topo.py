@@ -30,13 +30,13 @@ def update_params(reg, spec):
     return newparam
 
 
-def recompute_topo(spec, data_dir,output = None):
+def recompute_topo(spec, data_dir, output=None):
     import regulus.file as rf
     import regulus.update.find_reg as fr
     from regulus.morse.morse import morse
     from regulus.update.update_model import update_model
 
-    regulus = fr.get(spec, data_dir=data_dir)
+    regulus = fr.get(spec, wdir=data_dir)
 
     param = update_params(regulus, spec)
 

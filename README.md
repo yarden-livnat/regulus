@@ -24,8 +24,8 @@ Provides information about a regulus file
 Computes Morse (ascending or descending) or Morse-Smale complex for one or more of 
 the measures in a regulus file
 
-`morse [-type [smale|ascending|descending]] [-m <list of measures>] [-k | --knn <n>] [-b|--beta <n>] [-g|--graph <list of options>] 
-[-G|--gradient <name>] [-o|--out <output.json] filename.json` 
+`morse [-t|--type [smale|ascend|descend]] [-m <list of measures>] [-k | --knn <n>] [-b|--beta <n>] [-G|--graph <list of options>] 
+[-g|--gradient <name>] [-o|--out <output.json] filename.json` 
 
 
 ### resample

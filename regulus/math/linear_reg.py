@@ -1,7 +1,7 @@
 from sklearn import linear_model
 
 
-def linearregression(x, y, args=None):
+def linear_reg(x, y, args=None):
     reg = linear_model.LinearRegression()
     reg.fit(x, y)
 

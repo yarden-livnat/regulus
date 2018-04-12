@@ -1,21 +1,21 @@
 import numpy as np
-from regulus.math.linear_reg import linearregression
+from regulus.math.linear_reg import linear_reg
 from regulus.math.pca import pca
-from regulus.math.inv_kernel_reg import inversekernelregression
+from regulus.math.inv_kernel_reg import inv_kernel_reg
 
 from regulus import file as rf
 
 defaults = {
     'linear_reg': {
-        'method': linearregression,
+        'method': linear_reg,
         'args': None
     },
     'pca': {
         'method': pca,
         'args': 2
     },
-    'inverse_kernel_regression': {
-        'method': inversekernelregression,
+    'inv_kernel_reg': {
+        'method': inv_kernel_reg,
         'args': None
     }
 }

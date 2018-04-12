@@ -2,7 +2,7 @@ from sklearn.kernel_ridge import KernelRidge
 import numpy as np
 
 
-def inversekernelregression(x, y, args=None):
+def inv_kernel_reg(x, y, args=None):
     clf = KernelRidge(alpha=1.0, kernel='rbf')
     clf.fit(y.reshape(-1, 1), x)
     y_p = np.linspace(np.amin(y), np.amax(y), 100)

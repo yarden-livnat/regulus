@@ -63,7 +63,7 @@ def post_process(regulus, data_dir=None, outfile=None):
 def create_samples(spec, data_dir):
     import regulus.update.find_reg as fr
 
-    regulus = fr.get(spec, data_dir=data_dir)
+    regulus = fr.get(spec, wdir=data_dir)
     newsamples = sample(regulus, spec, data_dir)
     return [regulus, newsamples]
 
@@ -81,6 +81,3 @@ def get_sample(spec, data_dir):
     dims = regulus['dims']
     measures = regulus['measures']
     return list2obj(newsamples, dims, measures)
-
-
-
