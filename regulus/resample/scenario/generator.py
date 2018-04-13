@@ -86,42 +86,23 @@ class Generator(object):
         Generator.xml_set_values(parent, 'n_build', num)
         Generator.xml_set_values(parent, 'prototypes', what)
 
-    def select_values(self, spec):
-        for var in VARS:
+    def select_values(self, spec, samples=None):
+        for idx, var in enumerate(VARS):
             value = None
-            if 'values' in var:
-                values = var['values']
-                value = values[random.randrange(0, len(values))]
-            elif 'range' in var:
-                values = var['range']
-                value = random.uniform(values[0], values[1])
-            elif 'irange' in var:
-                values = var['irange']
-                value = random.randrange(values[0], values[1])
-
-            var['value'] = value
-            if 'pattern' in var:
-                nodes = self.scenario.findall(var['pattern'])
-                for node in nodes:
-                    node.text = str(value)
+            if samples is None:
+                if 'values' in var:
+                    values = var['values']
+                    value = values[random.randrange(0, len(values))]
+                elif 'range' in var:
+                    values = var['range']
+                    value = random.uniform(values[0], values[1])
+                elif 'irange' in var:
+                    values = var['irange']
+                    value = random.randrange(values[0], values[1])
             else:
-                setattr(spec, var['name'], value)
+                value = float(samples[idx])
 
-    def pick_values(self, spec,samples):
-        for idx,var in enumerate(VARS):
-            value = None
-            # if 'values' in var:
-            #     values = var['values']
-            #     value = values[random.randrange(0, len(values))]
-            # elif 'range' in var:
-            #     values = var['range']
-            #     value = random.uniform(values[0], values[1])
-            # elif 'irange' in var:
-            #     values = var['irange']
-            #     value = random.randrange(values[0], values[1])
-            value = float(samples[idx])
             var['value'] = value
-
             if 'pattern' in var:
                 nodes = self.scenario.findall(var['pattern'])
                 for node in nodes:
@@ -157,26 +138,12 @@ class Generator(object):
         self.create_demand(self.ns.initial_demand, self.spec.rate, self.spec.years)
         self.spec.demand = self.demand
 
-    def author(self):
+    def author(self, samples=None):
         lwr_units = [0] * self.spec.years
         fr_units = [0] * self.spec.years
         self.spec.supply = lwr_units, fr_units
 
-        self.select_values(self.spec)
-        schedule = scheduler(self.spec)
-
-        deploy = self.scenario.find(".//*[name='{}']/config/DeployInst".format('deploy_inst'))
-        self.set_schedule(deploy, schedule)
-
-        return self.scenario, [str(var['value']) for var in VARS]
-
-
-    def buthor(self,samples):
-        lwr_units = [0] * self.spec.years
-        fr_units = [0] * self.spec.years
-        self.spec.supply = lwr_units, fr_units
-
-        self.pick_values(self.spec,samples)
+        self.select_values(self.spec, samples)
         schedule = scheduler(self.spec)
 
         deploy = self.scenario.find(".//*[name='{}']/config/DeployInst".format('deploy_inst'))

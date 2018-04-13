@@ -1,8 +1,8 @@
 from pathlib import Path
 import regulus.file as rf
 
-def get(spec, wdir=None):
 
+def get(spec, wdir=None):
     name = spec['name']
     version = spec['version']
 

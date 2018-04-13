@@ -3,7 +3,7 @@
 
 ## Installation (for development)
 
-run `python setup develop` then `pip install -e .`
+run `python setup.py develop` then `pip install -e .`
 
 
 ## CLI

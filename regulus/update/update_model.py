@@ -3,7 +3,6 @@ from regulus.math.linear_reg import linear_reg
 from regulus.math.pca import pca
 from regulus.math.inv_kernel_reg import inv_kernel_reg
 
-from regulus import file as rf
 
 defaults = {
     'linear_reg': {
@@ -38,6 +37,7 @@ def update_msc(msc, pts, ndims, measure_ind, spec):
     except Exception as e:
         print(e)
 
+
 def update_partition(partition, idx, pts, ndims, measure_ind, spec):
     span = partition["span"]
     pts_idx = idx[span[0]:span[1]]
@@ -68,7 +68,6 @@ def compute_model(x, y, spec):
 def update_model(regulus, spec=None):
     if spec is None:
         spec = defaults
-
     update_regulus(regulus, spec)
 
 

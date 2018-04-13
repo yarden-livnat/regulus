@@ -1,11 +1,11 @@
+from pathlib import Path
+import argparse
+import json
+
 from regulus.update.refine_topo import refine
 
+
 def refine_topo_cli():
-    from pathlib import Path
-    import argparse
-
-    import json
-
     p = argparse.ArgumentParser()
     p.add_argument('specname', help='new sample spec .json file]')
     p.add_argument('-o', '--out', help='output file')
@@ -22,5 +22,4 @@ def refine_topo_cli():
 
 
 if __name__ == '__main__':
-    # pass
     refine_topo_cli()

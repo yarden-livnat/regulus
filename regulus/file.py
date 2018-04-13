@@ -33,10 +33,8 @@ def from_csv(filename, ndims=-1, sample_method=DEFAULT_SAMPLE_METHOD, name=None,
                 'complexes': {}
             }
         }
-
         if duplicates:
             remove_duplicates(regulus)
-
         return regulus
 
 
@@ -45,9 +43,6 @@ def load(filename):
         regulus = json.load(f)
         verify(regulus)
         return regulus
-
-
-
 
 
 def save(regulus, filename=None, data_dir=None):
@@ -91,9 +86,7 @@ def verify(regulus):
 
     attr = regulus['attr']
     if 'path' not in attr:
-        # Changed to store version
-        # attr['path'] = regulus['name']+'.json'
-        attr['path'] = regulus['name'] + regulus['version'] + '.json'
+        attr['path'] = "{}.{}.json".format(regulus['name'], regulus['version'])
 
     if 'sample_method' not in regulus:
         regulus['sample_method'] = DEFAULT_SAMPLE_METHOD
