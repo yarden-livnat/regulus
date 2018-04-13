@@ -7,7 +7,7 @@ from getpass import getuser
 DEFAULT_SAMPLE_METHOD = 'Predictor'
 
 
-def from_csv(filename, name=None, ndims=-1, sample_method=DEFAULT_SAMPLE_METHOD, duplicates=True):
+def from_csv(filename, ndims=-1, sample_method=DEFAULT_SAMPLE_METHOD, name=None, duplicates=True):
     with open(filename) as f:
         reader = csv.reader(f)
         header = next(reader)
@@ -47,11 +47,15 @@ def load(filename):
         return regulus
 
 
-def save(regulus, filename=None):
+
+
+
+def save(regulus, filename=None, data_dir=None):
     if filename is None:
         filename = regulus['attr']['path']
+
     with open(filename, 'w') as f:
-        json.dump(regulus, f)
+        json.dump(regulus, f, indent=2)
 
 
 def remove_duplicates(regulus, force=False):
@@ -87,8 +91,9 @@ def verify(regulus):
 
     attr = regulus['attr']
     if 'path' not in attr:
-        attr['path'] = regulus['name']+'.json'
+        # Changed to store version
+        # attr['path'] = regulus['name']+'.json'
+        attr['path'] = regulus['name'] + regulus['version'] + '.json'
 
     if 'sample_method' not in regulus:
         regulus['sample_method'] = DEFAULT_SAMPLE_METHOD
-

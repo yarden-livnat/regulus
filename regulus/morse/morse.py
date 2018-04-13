@@ -14,16 +14,18 @@ defaults = {
 
 
 def merge(src, default):
-    dest = dict(src)
-    for key, value in default.items():
-        if key not in dest or dest[key] is None:
-            dest[key] = default[key]
-        print('merge', key, dest[key])
-    return dest
+    if src is not None:
+        dest = dict(src)
+        for key, value in default.items():
+            if key not in dest or dest[key] is None:
+                dest[key] = default[key]
+            print('merge', key, dest[key])
+        return dest
+    else:
+        return default
 
 
-def morse(regulus, kind='smale', measures=None, args=None, debug=False):
-
+def morse(regulus, kind=None, measures=None, args=None, debug=False):
     ndims = len(regulus['dims'])
     if measures is None:
         measures = regulus['measures']
@@ -36,16 +38,20 @@ def morse(regulus, kind='smale', measures=None, args=None, debug=False):
             print('\npost ', measure)
             prev = rf.params(regulus, measure)
             params = merge(args, prev)
-            current = merge(params, defaults)
 
+            current = merge(params, defaults)
             y = pts[:, ndims + i]
-            msc = MSC(current['graph'], current['gradient'], current['knn'], current['beta'], current['norm'], aggregator='mean')  # connect=True
+
+            msc = MSC(current['graph'], current['gradient'], current['knn'], current['beta'], current['norm'],
+                      aggregator='mean')  # connect=True
             msc.build(X=x, Y=y, names=regulus['dims'] + [measure])
 
             x = msc.X
             y = msc.Y
             post = Post(debug).data(y)
 
+            if kind == None:
+                kind = regulus['morse']['complexes'][measure]['type']
             if kind == 'descend':
                 post.msc(msc.descending_partitions, msc.max_hierarchy)
             elif kind == 'ascend':
@@ -55,7 +61,7 @@ def morse(regulus, kind='smale', measures=None, args=None, debug=False):
 
             mc = post.build().verify().get_tree(measure)
             mc['type'] = kind
-            mc['params'] = params
+            mc['params'] = current
             regulus['morse']['complexes'][measure] = mc
 
         except RuntimeError as error:
