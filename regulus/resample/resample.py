@@ -50,16 +50,7 @@ def resample(sample_input, regulus):
         new_data = testfun.generateres(new_input)
         return new_data
 
-    elif 'pnnl' in sim_method.lower():
 
-        from regulus.resample.Predictor import Predictor
-
-        data = np.array(regulus['pts'])
-        X = data[:, :-1]
-        y = data[:, -1]
-        model = Predictor(X, y)
-        new_data = model.predict(sample_input)
-        return new_data
 
 
     elif 'ackley' in sim_method.lower():
@@ -96,6 +87,42 @@ def resample(sample_input, regulus):
         return out
 
 
+    elif 'keras' in sim_method.lower():
+        from pathlib import Path
+        from regulus.resample.neural_net import baseline_model
+
+        filename = Path(regulus['attr']['path'])
+        wdir = filename.parent
+        name = regulus['name']
+        weight_file = wdir / "{}.h5".format(name)
+
+        data = np.array(regulus['pts'])
+        X = data[:, :-1]
+        y = data[:, -1]
+
+        if weight_file.exists():
+            print(str(weight_file))
+            model = baseline_model(X, y, fit=False)
+            model.load_weights(str(weight_file))
+        else:
+
+            [model, loss] = baseline_model(X, y)
+            print(loss)
+            model.save_weights(str(weight_file))
+
+        new_data = model.predict(np.array(sample_input))
+
+        import keras.backend.tensorflow_backend as tfbk
+        tfbk.clear_session()
+        out = []
+
+        for i in range(len(sample_input)):
+            y = new_data[i]
+            out.append(sample_input[i] + y.tolist())
+
+        return out
+
+
     else:
         print("can't resample for " + sim_method)
         # exit(255)
@@ -106,6 +133,3 @@ def save_samples(data, filename):
     with open(filename, 'w', newline='') as f:
         report = csv.writer(f, delimiter=',')
         report.writerows(data)
-
-
-

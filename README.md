@@ -12,7 +12,7 @@ Command line programs
 ### regulus
 creates a regulus json file from a set of points (csv file with header)
 
-`regulus --csv <file.csv> [-d <n>] [-h | --help]`
+`regulus --csv <file.csv> [-d <n>] [-s <sample method [predictor|keras|other]>] [-h | --help]`
 
 
 ### info

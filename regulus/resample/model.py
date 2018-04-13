@@ -62,7 +62,7 @@ class Predictor(object):
               'fit_intercept': [False, True]}),
               ('Ridge', linear_model.Ridge(), {}),
               ('SVR', svm.SVR(),
-               {'kernel': ['sigmoid', 'rbf', 'linear'],#, 'poly'],
+               {'kernel': ['rbf', 'linear'],#,'sigmoid',  'poly'],
                 #'degree': [2, 3, 4],#, 5],#, 6, 7],
                 'C': [1, 1e3, 1e6, 1e9],
                 #'gamma': ['auto',1e-2, 1e-1, 1, 10],
