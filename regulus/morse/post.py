@@ -117,10 +117,10 @@ class Post(object):
         if min_v > max_v:
             print('*** min > max', min_v, max_v)
         for pt_idx in p.base_pts:
-            if pt_idx != p.min_idx and self.data_pts[pt_idx] < min_v:
-                print('*** Partition check p:{} min:{} at {} found min:{} at {}'.format(p.id, min_v, p.min_idx, self.data_pts[pt_idx], pt_idx))
-            if pt_idx != p.max_idx and self.data_pts[pt_idx] > max_v:
-                print('*** Partition check p:{} max:{} at {} found max:{} at {}'.format(p.id, max_v, p.max_idx, self.data_pts[pt_idx], pt_idx))
+            if self.data_pts[pt_idx] < min_v:
+                print('*** Partition id:{} min:{} at {} found min:{} at {}'.format(p.id, min_v, p.min_idx, self.data_pts[pt_idx], pt_idx))
+            if self.data_pts[pt_idx] > max_v:
+                print('*** Partition id:{} max:{} at {} found max:{} at {}'.format(p.id, max_v, p.max_idx, self.data_pts[pt_idx], pt_idx))
 
     #
     # build
