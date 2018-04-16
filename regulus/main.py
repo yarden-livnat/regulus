@@ -9,8 +9,8 @@ def main():
     p.add_argument('--csv', help='create from a .csv file')
     p.add_argument('-o', '--out', help='output file')
 
-    p.add_argument('-d', '--dims', default=-1, help='number of dimensions. default is all but the last column')
-    p.add_argument('-s', '--sims', default='Predictor', help='sample method')
+    p.add_argument('-d', '--dims', default=-1, type=int, help='number of dimensions. default is all but the last column')
+    p.add_argument('-m', '--method', default='Predictor', help='sample method')
 
     ns = p.parse_args()
 
@@ -20,7 +20,7 @@ def main():
         return
 
     if ns.csv:
-        regulus = rf.from_csv(ns.csv, ns.dims, sample_method = ns.sims)
+        regulus = rf.from_csv(ns.csv, ns.dims, sample_method = ns.method)
         rf.save(regulus, ns.out)
 
 
