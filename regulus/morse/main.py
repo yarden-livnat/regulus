@@ -3,7 +3,7 @@ import argparse
 
 from regulus import file as rf
 from .morse import morse
-
+from typing import Iterable
 
 def parse_args(args=None):
     p = argparse.ArgumentParser(prog='morse', description='compute Morse (or Morse-Smale complex')
@@ -31,7 +31,7 @@ def run():
     params = {}
     for a in ('knn', 'beta', 'norm', 'graph', 'gradient'):
         if hasattr(ns, a):
-            params[a] = getattr(ns, a)
+            params[a] = ' '.join(getattr(ns, a)) if isinstance(getattr(ns, a), Iterable) else getattr(ns, a)
 
     morse(regulus, kind=ns.type, measures=ns.measures, args=params, debug=ns.debug)
 
