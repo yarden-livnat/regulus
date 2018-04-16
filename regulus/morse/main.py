@@ -12,8 +12,8 @@ def parse_args(args=None):
     p.add_argument('-k', '--knn', type=int, help='knn')
     p.add_argument('-b', '--beta', type=float, help='beta')
     p.add_argument('-n', '--norm', help='norm')
-    p.add_argument('-G', '--graph', nargs='*', help='graph')
-    p.add_argument('-g', '--gradient', help='gradient')
+    p.add_argument('-g', '--graph', nargs='*', help='graph')
+    p.add_argument('-G', '--gradient', help='gradient')
 
     p.add_argument('-m', '--measures', nargs='*', default=None, help='measures to process. default=all measures')
 
