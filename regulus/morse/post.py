@@ -53,8 +53,13 @@ class Partition(object):
         child.parent = self
         self.children.append(child)
         if child.min_idx != self.min_idx and child.max_idx != self.max_idx:
-            print("ERROR: child {} [{} {}] merged into parent {} [{} {}] without a matching extrema".format(child.id,
-                    child.min_idx, child.max_idx, self.id, self.min_idx, self.max_idx))
+            print("Warning: child {} [{} {}] merged into parent {} [{} {}] without a matching extrema".format(child.id,
+                                                                                                              child.min_idx,
+                                                                                                              child.max_idx,
+                                                                                                              self.id,
+                                                                                                              self.min_idx,
+                                                                                                              self.max_idx))
+            print("{} and {} are saddles of each other".format(child.min_idx, child.max_idx))
 
 
 class Post(object):
@@ -118,9 +123,11 @@ class Post(object):
             print('*** min > max', min_v, max_v)
         for pt_idx in p.base_pts:
             if self.data_pts[pt_idx] < min_v:
-                print('*** Partition id:{} min:{} at {} found min:{} at {}'.format(p.id, min_v, p.min_idx, self.data_pts[pt_idx], pt_idx))
+                print('*** Partition id:{} min:{} at {} found min:{} at {}'.format(p.id, min_v, p.min_idx,
+                                                                                   self.data_pts[pt_idx], pt_idx))
             if self.data_pts[pt_idx] > max_v:
-                print('*** Partition id:{} max:{} at {} found max:{} at {}'.format(p.id, max_v, p.max_idx, self.data_pts[pt_idx], pt_idx))
+                print('*** Partition id:{} max:{} at {} found max:{} at {}'.format(p.id, max_v, p.max_idx,
+                                                                                   self.data_pts[pt_idx], pt_idx))
 
     #
     # build
@@ -353,4 +360,3 @@ class Post(object):
         if node.persistence > 0:
             for child in node.children:
                 self.stat(child, levels)
-
