@@ -18,7 +18,7 @@ def update_regulus(regulus, spec, math_model=None):
     i = 0
     for measure, msc in mscs.items():  # in enumerate(mscs):
         try:
-            print("Calculating Similarity for " + measure)
+            print("Calculating " + spec + " Similarity for " + measure)
             for partition in msc["partitions"]:
                 target_partition = get_partition(partition, spec, msc["partitions"])
                 calc_sim(partition, target_partition, msc['pts_idx'], pts, dims, i, spec)
@@ -76,9 +76,9 @@ def calc_sim(p1, p2, idx, pts, ndims, measure_ind, spec):
         y2_min = pts[min2, ndims + measure_ind]
         y2_max = pts[max2, ndims + measure_ind]
 
-        # Calculate shared range
-        y_min = y2_min if y2_min > y1_min else y1_min
-        y_max = y2_max if y2_max < y1_max else y2_max
+        # Calculate Union range
+        y_min = y2_min if y2_min < y1_min else y1_min
+        y_max = y2_max if y2_max > y1_max else y2_max
 
         y_p = np.linspace(y_min, y_max, PTSFORCORRELATION)
 

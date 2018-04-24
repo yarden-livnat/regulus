@@ -25,8 +25,8 @@ def update_regulus(regulus, spec):
     pts = np.array(regulus['pts'])
     dims = len(regulus["dims"])
     i = 0
-    for measure, msc in mscs.items():  # in enumerate(mscs):
-        print("Calculating Model for " + measure)
+    for name, msc in mscs.items():  # in enumerate(mscs):
+        print("Calculating Model " + spec + " for " + name)
         update_msc(msc, pts, dims, i, spec)
         i = i + 1
 

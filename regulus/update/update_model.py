@@ -11,7 +11,7 @@ def update_model(regulus, spec=None, sim=None):
             model = Model.factory(item)
             model.compute(regulus)
 
-        if sim is not None:
+        if sim is not False:
             for item in SIMILARITIES:
                 sim = Similarity.factory(item)
                 sim.compute(regulus)
@@ -21,7 +21,7 @@ def update_model(regulus, spec=None, sim=None):
             model = Model.factory(item)
             model.compute(regulus)
 
-        if sim is not None:
+        if sim is not False:
             for item in spec['similarity']:
                 sim = Similarity.factory(item)
                 sim.compute(regulus)

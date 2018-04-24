@@ -4,7 +4,7 @@ from topopy.MorseSmaleComplex import MorseSmaleComplex as MSC
 from regulus import file as rf
 from .post import Post
 
-defaults = {
+DEFAULTS = {
     'knn': 100,
     'beta': 1.0,
     'norm': 'feature',
@@ -39,7 +39,7 @@ def morse(regulus, kind=None, measures=None, args=None, debug=False):
             prev = rf.params(regulus, measure)
             params = merge(args, prev)
 
-            current = merge(params, defaults)
+            current = merge(params, DEFAULTS)
             y = pts[:, ndims + i]
 
             msc = MSC(current['graph'], current['gradient'], current['knn'], current['beta'], current['norm'],

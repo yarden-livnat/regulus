@@ -45,9 +45,16 @@ def load(filename):
         return regulus
 
 
-def save(regulus, filename=None, data_dir=None):
+def save(regulus, filename=None, data_dir=None, update=None):
+
+    if update is not None:
+        regulus['attr']['path'] = "{}.{}.json".format(regulus['name'], regulus['version'])
+
     if filename is None:
         filename = regulus['attr']['path']
+
+    if data_dir is not None:
+        filename = Path(data_dir) / filename
 
     with open(filename, 'w') as f:
         json.dump(regulus, f, indent=2)

@@ -7,8 +7,8 @@ import regulus.update.find_reg as find_reg
 
 PARAMS = {
     'k': {'name': 'knn', 'type': int},
-    'G': {'name': 'graph', 'type': str},
-    'g': {'name': 'gradient', 'type': str},
+    'g': {'name': 'graph', 'type': str},
+    'G': {'name': 'gradient', 'type': str},
     'n': {'name': 'norm', 'type': str},
     'b': {'name': 'beta', 'type': float}
 }
@@ -32,4 +32,6 @@ def recompute_topo(spec, data_dir, output=None):
     morse(regulus, args=params)
     update_model(regulus)
 
-    rf.save(regulus, output)
+    rf.save(regulus, update=1, data_dir=data_dir)
+
+    return 0

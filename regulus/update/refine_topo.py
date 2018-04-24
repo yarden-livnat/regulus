@@ -24,7 +24,7 @@ def post_process(regulus, data_dir=None, outfile=None):
         morse(regulus)
         update_model(regulus)
         # Might be changed later due to data_dir
-        rf.save(regulus, filename=outfile, data_dir=data_dir)
+        rf.save(regulus, update=1, data_dir=data_dir)
         return 0
     except Exception as e:
         print(e)
@@ -45,10 +45,12 @@ def create_samples(spec, data_dir):
 def refine(spec, data_dir=None, filename=None):
     [regulus, samples] = create_samples(spec, data_dir)
     add_pts(regulus, samples)
+    regulus["name"] = spec["name"]
+    regulus["version"] = spec["new_version"]
     return post_process(regulus, data_dir, filename)
 
 
 def get_sample(spec, data_dir):
     [regulus, samples] = create_samples(spec, data_dir)
     cols = regulus['dims'] + regulus['measures']
-    return [ dict(zip(cols, values)) for values in samples]
+    return [dict(zip(cols, values)) for values in samples]

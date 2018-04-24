@@ -5,17 +5,17 @@ from pathlib import Path
 class Resample(object):
 
     def factory(type):
-        if type == "predictor":
+        if "predictor" in type.lower():
             return Predictor()
-        elif type == "keras":
+        elif "keras" in type.lower():
             return Keras()
-        elif type == "ackley":
+        elif "ackley" in type.lower():
             return Ackley()
-        elif type == "hartmann":
+        elif "hartmann" in type.lower():
             return Hartmann()
-        elif type == "test":
+        elif "test" in type.lower():
             return Test()
-        elif type == "deployment":
+        elif "deployment" in type.lower():
             return Deployment()
         raise AssertionError("Bad Sampling Method: " + type)
 
