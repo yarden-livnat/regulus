@@ -1,5 +1,4 @@
 import numpy as np
-
 from sklearn.kernel_ridge import KernelRidge
 
 # should be able to calculate either parent or sibling similarity for selected method
@@ -8,7 +7,7 @@ from sklearn.kernel_ridge import KernelRidge
 
 # Calculate Correlation between two vectors (normalize first then average between all dim?)
 
-PTSFORCORRELATION = 100
+PTS_FOR_CORRELATION = 100
 
 
 def update_regulus(regulus, spec, math_model=None):
@@ -18,12 +17,12 @@ def update_regulus(regulus, spec, math_model=None):
     i = 0
     for measure, msc in mscs.items():  # in enumerate(mscs):
         try:
-            print("Calculating " + spec + " Similarity for " + measure)
+            print("Calculating " + spec + " correlation for " + measure)
             for partition in msc["partitions"]:
                 target_partition = get_partition(partition, spec, msc["partitions"])
                 calc_sim(partition, target_partition, msc['pts_idx'], pts, dims, i, spec)
         except Exception as e:
-            print("Exception in similarity")
+            print("Exception in correlation")
             print(e)
         i = i + 1
 
@@ -37,7 +36,6 @@ def get_partition(partition, spec, partitions):
 
         if children_id is not None:
             sibling_id = [id for id in children_id if id != partition['id']]
-
             return partitions[sibling_id[0]] if len(sibling_id) >= 1 else None
         else:
             return None
@@ -78,9 +76,9 @@ def calc_sim(p1, p2, idx, pts, ndims, measure_ind, spec):
 
         # Calculate Union range
         y_min = y2_min if y2_min < y1_min else y1_min
-        y_max = y2_max if y2_max > y1_max else y2_max
+        y_max = y2_max if y2_max > y1_max else y1_max
 
-        y_p = np.linspace(y_min, y_max, PTSFORCORRELATION)
+        y_p = np.linspace(y_min, y_max, PTS_FOR_CORRELATION)
 
         # Predict Xs with Predictor for P1
         clf1 = KernelRidge(alpha=1.0, kernel='rbf')
@@ -91,18 +89,29 @@ def calc_sim(p1, p2, idx, pts, ndims, measure_ind, spec):
 
         clf2 = KernelRidge(alpha=1.0, kernel='rbf')
         clf2.fit(y2.reshape(-1, 1), x2)
-        x_p2 = clf1.predict(y_p.reshape(-1, 1))
+        x_p2 = clf2.predict(y_p.reshape(-1, 1))
 
         # order?
         corre = np.corrcoef(x_p1.T, x_p2.T)
+        # print(x_p1.T)
+        # print(corre)
 
-        p1['model'][spec + "_similarity"] = corre[0][1]
+        total = 0
+        n_features = int(corre.shape[0] / 2)
 
-        if np.isnan(corre[0][1]):
-            p1['model'][spec + "_similarity"] = None
+        for i in range(n_features):
+            total = total + corre[i, i + n_features]
+
+        p1['model'][spec + "_correlation"] = None if np.isnan(total) else total / n_features
+
+        # dist = cdist(x_p1, x_p2, 'mahalanobis', VI=None)
+
+        # p1['model'][spec + "_correlation"] = dist
+        # if np.isnan(corre[0][1]):
+        #    p1['model'][spec + "_correlation"] = None
 
     else:
-        p1['model'][spec + "_similarity"] = 0
+        p1['model'][spec + "_correlation"] = None
 
 
 class Similarity(object):

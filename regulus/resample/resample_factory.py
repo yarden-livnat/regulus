@@ -1,5 +1,5 @@
 import numpy as np
-from pathlib import Path
+from pathlib import Path, PurePath
 
 
 class Resample(object):
@@ -97,11 +97,11 @@ class Keras(Resample):
         y = data[:, -1]
 
         if weight_file.exists():
-            print(str(weight_file))
+            print("Found Weight File " + str(weight_file))
             model = baseline_model(X, y, fit=False)
             model.load_weights(str(weight_file))
         else:
-
+            print("Training New Network amd storing as " + str(weight_file))
             [model, loss] = baseline_model(X, y)
             print(loss)
             model.save_weights(str(weight_file))

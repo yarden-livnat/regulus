@@ -28,7 +28,7 @@ def baseline_model(X=None, Y=None, fit=True, nb_epoch=100, batch_size=5):
 
     if fit == True:
 
-        model.fit(X, Y, nb_epoch=100, batch_size=5)
+        model.fit(X, Y, nb_epoch=10, batch_size=10)
         loss = model.evaluate(X, Y)
         return [model, loss]
 
