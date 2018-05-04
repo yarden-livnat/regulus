@@ -1,4 +1,4 @@
-from regulus.math.similarity import Similarity
+from regulus.math.similarity import calc_similarity #Similarity
 from regulus.math.model import Model
 
 MODELS = ['pca', 'linear']
@@ -12,9 +12,10 @@ def update_model(regulus, spec=None, sim=None):
             model.compute(regulus)
 
         if sim is not False:
-            for item in SIMILARITIES:
-                sim = Similarity.factory(item)
-                sim.compute(regulus)
+            calc_similarity(regulus, SIMILARITIES)
+            #for item in SIMILARITIES:
+            #    sim = Similarity.factory(item)
+            #    sim.compute(regulus)
 
     else:
         for item in spec['model']:
@@ -22,6 +23,9 @@ def update_model(regulus, spec=None, sim=None):
             model.compute(regulus)
 
         if sim is not False:
-            for item in spec['similarity']:
-                sim = Similarity.factory(item)
-                sim.compute(regulus)
+
+            calc_similarity(regulus, spec['similarity'])
+
+            #for item in spec['similarity']:
+            #    sim = Similarity.factory(item)
+            #    sim.compute(regulus)

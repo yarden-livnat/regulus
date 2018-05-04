@@ -22,6 +22,7 @@ class Resample(object):
     factory = staticmethod(factory)
 
 
+
 class Deployment(Resample):
 
     def create(self, sample_input, regulus):
