@@ -38,6 +38,12 @@ Compute mathematical models for all partitions for all measures in a regulus fil
 
 `model regulus.json  [-s | --spec <spec.json>] [-o|--out <output file] [-h | --help]`
 
+### sim
+Compute similarities for all partitions for all measures in a regulus file 
+
+`sim regulus.json  [-m | --mod <model for regression>] [-f | --fun <function to calculate similarity>] [-o|--out <output file] [-h | --help]`
+
+
 ### recompute
 Recompute topology in a regulus file based on a spec file of parameters
 

@@ -1,6 +1,7 @@
 import numpy as np
-from sklearn.kernel_ridge import KernelRidge
 import time
+from regulus.math.sim_funcs import get_sim
+from regulus.math.models_funcs import create_models
 
 # should be able to calculate either parent or sibling similarity for selected method
 
@@ -11,57 +12,7 @@ import time
 PTS_FOR_CORRELATION = 50
 
 
-def create_models(regulus):
-    print("Calculating inverse regression: ")
-    model_dict = {}
-    mscs = regulus['morse']['complexes']
-    pts = np.array(regulus['pts'])
-    measure_ind = 0
-    ndims = len(regulus["dims"])
-    for measure, msc in mscs.items():
-
-        start_CPU = time.clock()
-
-        print("Measure = {}".format(measure))
-        print("Total Partitions = {}".format(len(msc['partitions'])))
-
-        model_dict[measure] = {}
-        cur_measure = model_dict[measure]
-        for partition in msc['partitions']:
-
-            start = time.clock()
-
-            span1 = partition["span"]
-            idx = msc['pts_idx']
-            id = partition['id']
-            pts_idx1 = idx[span1[0]:span1[1]]
-            [min1, max1] = partition["minmax_idx"]
-            pts_idx1.append(min1)
-            pts_idx1.append(max1)
-
-            data1 = pts[pts_idx1, :]
-
-            x1 = data1[:, 0:ndims]
-            y1 = data1[:, ndims + measure_ind]
-
-            clf = KernelRidge(alpha=1.0, kernel='rbf')
-            clf.fit(y1.reshape(-1, 1), x1)
-            cur_measure[id] = clf
-
-            end = time.clock()
-
-            if span1[1]-span1[0] > 2000:
-                print("Time to compute regression model: %f seconds" % (end - start) + " for %i points" %(span1[1]-span1[0]))
-
-        measure_ind = measure_ind + 1
-
-        end_CPU = time.clock()
-
-        print("Time to compute regression model: %f seconds" % (end_CPU - start_CPU))
-    return model_dict
-
-
-def update_regulus(regulus, specs, math_model, sim_func = None):
+def update_regulus(regulus, specs, math_model, sim_func):
     for spec in specs:
         mscs = regulus['morse']['complexes']
         # pts = np.array(regulus['pts'])
@@ -82,19 +33,18 @@ def update_regulus(regulus, specs, math_model, sim_func = None):
                         target_idx = target_partition["id"]
                         # only calculate sim once between every pair
                         if spec is 'parent' or (spec is 'sibling' and int(cur_idx) < int(target_idx)):
-                            # print([cur_idx, target_idx])
-
                             # Compute Similarity
-                            sim = comp_sim(cur_idx, target_idx, regulus, measure, math_model, sim_func)
+                            sim_val = comp_sim(cur_idx, target_idx, regulus, measure, math_model, sim_func)
                             # Set Similarity
-                            set_sim(cur_idx, target_idx, regulus, measure, spec, sim)
+                            set_sim(cur_idx, target_idx, regulus, measure, spec, sim_val)
 
                     else:
                         set_sim(cur_idx, None, regulus, measure, spec, None)
 
                 end_CPU = time.clock()
 
-                print("Time to calculate ".format(spec)+" similarity for ".format(measure) + ": %f seconds" % (end_CPU - start_CPU))
+                print("Time to calculate ".format(spec) + " similarity for ".format(measure) + ": %f seconds" % (
+                        end_CPU - start_CPU))
 
             except Exception as e:
                 print("Exception in correlation")
@@ -117,118 +67,8 @@ def get_partition(partition, spec, partitions):
             return None
 
 
-'''
-def calc_sim(p1, p2, idx, pts, ndims, measure_ind, spec):
-    if 'model' not in p1:
-        p1['model'] = {}
-
-    if p2 is not None:
-
-        # Extract pts from Partition 1
-        span1 = p1["span"]
-        pts_idx1 = idx[span1[0]:span1[1]]
-        [min1, max1] = p1["minmax_idx"]
-        pts_idx1.append(min1)
-        pts_idx1.append(max1)
-
-        data1 = pts[pts_idx1, :]
-        x1 = data1[:, 0:ndims]
-        y1 = data1[:, ndims + measure_ind]
-
-        y1_min = pts[min1, ndims + measure_ind]
-        y1_max = pts[max1, ndims + measure_ind]
-
-        # Extract pts from Partition 2
-        span2 = p2["span"]
-        pts_idx2 = idx[span2[0]:span2[1]]
-        [min2, max2] = p2["minmax_idx"]
-        pts_idx2.append(min2)
-        pts_idx2.append(max2)
-
-        data2 = pts[pts_idx2, :]
-        x2 = data2[:, 0:ndims]
-        y2 = data2[:, ndims + measure_ind]
-
-        y2_min = pts[min2, ndims + measure_ind]
-        y2_max = pts[max2, ndims + measure_ind]
-
-        # Calculate Union range
-        y_min = y2_min if y2_min < y1_min else y1_min
-        y_max = y2_max if y2_max > y1_max else y1_max
-
-        y_p = np.linspace(y_min, y_max, PTS_FOR_CORRELATION)
-
-        # Predict Xs with Predictor for P1
-        start_CPU = time.clock()
-
-        clf1 = KernelRidge(alpha=1.0, kernel='rbf')
-        clf1.fit(y1.reshape(-1, 1), x1)
-
-        print(clf1)
-
-        end_CPU = time.clock()
-        print("F1 fit: %f CPU seconds" % (end_CPU - start_CPU))
-
-        start_CPU = time.clock()
-
-        x_p1 = clf1.predict(y_p.reshape(-1, 1))
-
-        end_CPU = time.clock()
-        print("F1 predict: %f CPU seconds" % (end_CPU - start_CPU))
-
-        # Predict Xs with Predictor for P2
-
-        clf2 = KernelRidge(alpha=1.0, kernel='rbf')
-
-        start_CPU = time.clock()
-
-        clf2.fit(y2.reshape(-1, 1), x2)
-
-        end_CPU = time.clock()
-
-        print("F2 fit: %f CPU seconds" % (end_CPU - start_CPU))
-
-        start_CPU = time.clock()
-
-        x_p2 = clf2.predict(y_p.reshape(-1, 1))
-
-        end_CPU = time.clock()
-
-        print("F2 predict: %f CPU seconds" % (end_CPU - start_CPU))
-
-        # order?
-
-        start_CPU = time.clock()
-
-        corre = np.corrcoef(x_p1.T, x_p2.T)
-
-        end_CPU = time.clock()
-
-        print("Correlation: %f CPU seconds" % (end_CPU - start_CPU))
-        # print(x_p1.T)
-        # print(corre)
-
-        total = 0
-        n_features = int(corre.shape[0] / 2)
-
-        for i in range(n_features):
-            total = total + corre[i, i + n_features]
-
-        p1['model'][spec + "_correlation"] = None if np.isnan(total) else total / n_features
-
-        # dist = cdist(x_p1, x_p2, 'mahalanobis', VI=None)
-
-        # p1['model'][spec + "_correlation"] = dist
-        # if np.isnan(corre[0][1]):
-        #    p1['model'][spec + "_correlation"] = None
-
-    else:
-        p1['model'][spec + "_correlation"] = None
-'''
-
 # Compute Similarity with specified sim_function
-
-def comp_sim(id1, id2, regulus, measure, model_dict, sim_func=None):
+def comp_sim(id1, id2, regulus, measure, model_dict, sim_func):
     mscs = regulus['morse']['complexes']
     msc = mscs[measure]
     idx = msc['pts_idx']
@@ -240,8 +80,9 @@ def comp_sim(id1, id2, regulus, measure, model_dict, sim_func=None):
     p1 = partitions[int(id1)]
     p2 = partitions[int(id2)]
 
-    if sim_func is None:
-        sim_func = default_sim
+    # if sim_func is None:
+    #    sim_func = default_sim
+
     [y_min, y_max] = get_union_range(p1, p2, pts, ndims, measure_ind, idx)
 
     y_p = np.linspace(y_min, y_max, PTS_FOR_CORRELATION)
@@ -317,19 +158,23 @@ def get_union_range(p1, p2, pts, ndims, measure_ind, idx):
     return [y_min, y_max]
 
 
-def default_sim(v1, v2):
-    from scipy.stats.stats import pearsonr
-    r, p = pearsonr(v1, v2)
-    return r
+# def default_sim(v1, v2):
+#    from scipy.stats.stats import pearsonr
+#    r, p = pearsonr(v1, v2)
+#    return r
 
 
-def calc_similarity(regulus, types, sim_func = None):
-
-    model = create_models(regulus)
+def calc_similarity(regulus, types, sim_func=None, model_func=None):
+    # Create models for all part
+    models = create_models(regulus, model_func)
 
     start_CPU = time.clock()
 
-    update_regulus(regulus, types, model, sim_func)
+    # Get similarity function
+    sim = get_sim(sim_func)
+
+    # Compute similarities for all partitions
+    update_regulus(regulus, types, models, sim)
 
     end_CPU = time.clock()
 

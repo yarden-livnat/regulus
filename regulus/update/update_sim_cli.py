@@ -2,26 +2,22 @@ import argparse
 import json
 
 import regulus.file as rf
-from regulus.update.update_model import update_model
+from regulus.update.update_sim import update_sim
 
 
-def update_model_cli():
+def update_sim_cli():
     p = argparse.ArgumentParser()
     p.add_argument('filename', help='regulus .json file]')
     p.add_argument('-o', '--out', help='output file')
-    p.add_argument('-s', '--spec', help='update_model spec file')
+    p.add_argument('-m', '--mod', help='model used to fit each partition')
+    p.add_argument('-f', '--fun', help='function used to compute similarity')
 
     ns = p.parse_args()
 
     regulus = rf.load(ns.filename)
 
-    if ns.spec is None:
-        spec = ns.spec
-    else:
-        with open(ns.spec) as f:
-            spec = json.load(f)
     try:
-        update_model(regulus, spec)
+        update_sim(regulus, sim=ns.fun, model=ns.mod)
         filename = ns.out if ns.out is not None else ns.filename
         rf.save(regulus, filename)
 
@@ -31,4 +27,4 @@ def update_model_cli():
 
 
 if __name__ == "__main__":
-    update_model_cli()
+    update_sim_cli()

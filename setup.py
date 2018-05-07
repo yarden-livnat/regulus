@@ -34,6 +34,7 @@ setup(
             'info=regulus.info:info',
             'resample = regulus.resample.resample_cli:resample_cli',
             'model = regulus.update.update_model_cli:update_model_cli',
+            'sim = regulus.update.update_sim_cli:update_sim_cli',
             'refine = regulus.update.refine_topo_cli:refine_topo_cli',
             'recompute = regulus.update.recompute_topo_cli:recompute_topo_cli',
 
