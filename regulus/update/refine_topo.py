@@ -1,5 +1,6 @@
 from regulus.resample.resample import resample
 from regulus.update.update_model import update_model
+from regulus.update.update_sim import update_sim
 import regulus.update.find_reg as find_reg
 from regulus.morse.morse import morse
 import regulus.file as rf
@@ -23,6 +24,7 @@ def post_process(regulus, data_dir=None, outfile=None):
     try:
         morse(regulus)
         update_model(regulus)
+        update_sim(regulus)
         # Might be changed later due to data_dir
         rf.save(regulus, update=1, data_dir=data_dir)
         return 0

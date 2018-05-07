@@ -2,7 +2,7 @@ import regulus.file as rf
 
 from regulus.morse.morse import morse
 from regulus.update.update_model import update_model
-
+from regulus.update.update_sim import update_sim
 import regulus.update.find_reg as find_reg
 
 PARAMS = {
@@ -31,6 +31,7 @@ def recompute_topo(spec, data_dir, output=None):
     params = get_params(spec)
     morse(regulus, args=params)
     update_model(regulus)
+    update_sim(regulus)
 
     rf.save(regulus, update=1, data_dir=data_dir)
 
