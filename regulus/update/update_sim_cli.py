@@ -12,12 +12,14 @@ def update_sim_cli():
     p.add_argument('-m', '--mod', help='model used to fit each partition')
     p.add_argument('-f', '--fun', help='function used to compute similarity')
 
+    p.add_argument('-r', '--measure', help='measure to compute similarity')
+
     ns = p.parse_args()
 
     regulus = rf.load(ns.filename)
 
     try:
-        update_sim(regulus, sim=ns.fun, model=ns.mod)
+        update_sim(regulus, sim=ns.fun, model=ns.mod, measure=ns.measure)
         filename = ns.out if ns.out is not None else ns.filename
         rf.save(regulus, filename)
 

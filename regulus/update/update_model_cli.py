@@ -11,6 +11,8 @@ def update_model_cli():
     p.add_argument('-o', '--out', help='output file')
     p.add_argument('-s', '--spec', help='update_model spec file')
 
+    p.add_argument('-m', '--measure', help='measure to compute similarity')
+
     ns = p.parse_args()
 
     regulus = rf.load(ns.filename)
@@ -21,7 +23,7 @@ def update_model_cli():
         with open(ns.spec) as f:
             spec = json.load(f)
     try:
-        update_model(regulus, spec)
+        update_model(regulus, spec, measure=ns.measure)
         filename = ns.out if ns.out is not None else ns.filename
         rf.save(regulus, filename)
 
