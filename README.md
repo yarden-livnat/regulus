@@ -28,11 +28,6 @@ the measures in a regulus file
 [-g|--gradient <name>] [-o|--out <output.json] filename.json` 
 
 
-### resample
-Resample with new sample input csv file for one or more of the measures with the sample_method in a regulus file 
-
-`resample input.csv   [-r | --reg <regulus.json>] [-o|--out <output file] --csv save as csv --json save as regulus.json [-h | --help]`
-
 ### model
 Compute mathematical models for all partitions for all measures in a regulus file
 
@@ -42,6 +37,12 @@ Compute mathematical models for all partitions for all measures in a regulus fil
 Compute similarities for all partitions for all measures in a regulus file 
 
 `sim regulus.json  [-m | --mod <model for regression>] [-f | --fun <function to calculate similarity>] [-o|--out <output file] [-h | --help]`
+
+
+### resample
+Resample with new sample input csv file for one or more of the measures with the sample_method in a regulus file 
+
+`resample input.csv   [-r | --reg <regulus.json>] [-o|--out <output file] --csv save as csv --json save as regulus.json [-h | --help]`
 
 
 ### recompute

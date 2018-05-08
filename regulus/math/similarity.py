@@ -1,7 +1,7 @@
 import numpy as np
 import time
 from regulus.math.sim_funcs import get_sim
-from regulus.math.models_funcs import create_models
+from regulus.math.model_funcs import create_models
 
 # should be able to calculate either parent or sibling similarity for selected method
 
@@ -12,14 +12,50 @@ from regulus.math.models_funcs import create_models
 PTS_FOR_CORRELATION = 50
 
 
-def update_regulus(regulus, specs, math_model, sim_func):
+def update_regulus(regulus, specs, math_model, sim_func, measure=None):
     for spec in specs:
         mscs = regulus['morse']['complexes']
         # pts = np.array(regulus['pts'])
         # dims = len(regulus["dims"])
         i = 0
 
-        for measure, msc in mscs.items():  # in enumerate(mscs):
+        # Need rewrite here
+        if measure is None:
+            for measure, msc in mscs.items():  # in enumerate(mscs):
+                try:
+                    start_CPU = time.clock()
+
+                    print("Calculating " + spec + " correlation for " + measure)
+                    for partition in msc["partitions"]:
+
+                        cur_idx = partition["id"]
+                        target_partition = get_partition(partition, spec, msc["partitions"])
+                        if target_partition is not None:
+
+                            target_idx = target_partition["id"]
+                            # only calculate sim once between every pair
+                            if spec is 'parent' or (spec is 'sibling' and int(cur_idx) < int(target_idx)):
+                                # Compute Similarity
+                                sim_val = comp_sim(cur_idx, target_idx, regulus, measure, math_model, sim_func)
+                                # Set Similarity
+                                set_sim(cur_idx, target_idx, regulus, measure, spec, sim_val)
+
+                        else:
+                            set_sim(cur_idx, None, regulus, measure, spec, None)
+
+                    end_CPU = time.clock()
+
+                    print("Time to calculate ".format(spec) + " similarity for ".format(measure) + ": %f seconds" % (
+                            end_CPU - start_CPU))
+
+                except Exception as e:
+                    print("Exception in correlation")
+                    print(e)
+
+                i = i + 1
+
+        else:
+            msc = mscs[measure]
             try:
                 start_CPU = time.clock()
 
@@ -49,8 +85,6 @@ def update_regulus(regulus, specs, math_model, sim_func):
             except Exception as e:
                 print("Exception in correlation")
                 print(e)
-
-            i = i + 1
 
 
 def get_partition(partition, spec, partitions):
@@ -164,9 +198,9 @@ def get_union_range(p1, p2, pts, ndims, measure_ind, idx):
 #    return r
 
 
-def calc_similarity(regulus, types, sim_func=None, model_func=None):
+def calc_similarity(regulus, types, sim_func=None, model_func=None, measure=None):
     # Create models for all part
-    models = create_models(regulus, model_func)
+    models = create_models(regulus, model_func, measure=measure)
 
     start_CPU = time.clock()
 
@@ -174,7 +208,7 @@ def calc_similarity(regulus, types, sim_func=None, model_func=None):
     sim = get_sim(sim_func)
 
     # Compute similarities for all partitions
-    update_regulus(regulus, types, models, sim)
+    update_regulus(regulus, types, models, sim, measure=measure)
 
     end_CPU = time.clock()
 

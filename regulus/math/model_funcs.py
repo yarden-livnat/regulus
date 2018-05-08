@@ -31,12 +31,7 @@ MODEL_FUNCS = {
 }
 
 
-def create_models(regulus, model=None):
-    # if model is None:
-    #    model = calc_inverse
-
-
-    # register model
+def create_models(regulus, model=None, measure = None):
     if model is None:
         Model.register(Inv_reg)
         new_model = Inv_reg()
@@ -45,6 +40,7 @@ def create_models(regulus, model=None):
         model_func = MODEL_FUNCS(model)
         Model.register(model_func)
         new_model = model_func()
+
     else:
         print("Could not recognize similarity functions")
         return
@@ -59,15 +55,57 @@ def create_models(regulus, model=None):
     pts = np.array(regulus['pts'])
     measure_ind = 0
     ndims = len(regulus["dims"])
-    for measure, msc in mscs.items():
+
+    if measure is None:
+        for measure, msc in mscs.items():
+
+            start_CPU = time.clock()
+
+            model_dict[measure] = {}
+            cur_measure = model_dict[measure]
+            for partition in msc['partitions']:
+
+                start = time.clock()
+
+                span1 = partition["span"]
+                idx = msc['pts_idx']
+                id = partition['id']
+                pts_idx1 = idx[span1[0]:span1[1]]
+                [min1, max1] = partition["minmax_idx"]
+                pts_idx1.append(min1)
+                pts_idx1.append(max1)
+
+                data1 = pts[pts_idx1, :]
+
+                x1 = data1[:, 0:ndims]
+                y1 = data1[:, ndims + measure_ind]
+
+                clf = cur_model(x1, y1)
+
+                cur_measure[id] = clf
+
+                end = time.clock()
+
+                if span1[1] - span1[0] > 2000:
+                    print("Fit regression model: %f seconds" % (end - start) + " for %i points" % (
+                            span1[1] - span1[0]))
+
+            measure_ind = measure_ind + 1
+
+            end_CPU = time.clock()
+
+            print("Time to compute regression model: %f seconds" % (end_CPU - start_CPU) + " for {}".format(
+                len(msc['partitions'])) + " partitions for measure {}".format(measure))
+
+    else:
+        msc = mscs[measure]
 
         start_CPU = time.clock()
 
-        # print("Measure = {}".format(measure))
-        # print("Total Partitions = {}".format(len(msc['partitions'])))
-
         model_dict[measure] = {}
+
         cur_measure = model_dict[measure]
+
         for partition in msc['partitions']:
 
             start = time.clock()
@@ -95,12 +133,11 @@ def create_models(regulus, model=None):
                 print("Fit regression model: %f seconds" % (end - start) + " for %i points" % (
                         span1[1] - span1[0]))
 
-        measure_ind = measure_ind + 1
-
         end_CPU = time.clock()
 
         print("Time to compute regression model: %f seconds" % (end_CPU - start_CPU) + " for {}".format(
             len(msc['partitions'])) + " partitions for measure {}".format(measure))
+
     return model_dict
 
 

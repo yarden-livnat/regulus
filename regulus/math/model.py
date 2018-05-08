@@ -20,15 +20,21 @@ MODELS = {
 }
 
 
-def update_regulus(regulus, spec):
+def update_regulus(regulus, spec, measure=None):
     mscs = regulus['morse']['complexes']
     pts = np.array(regulus['pts'])
     dims = len(regulus["dims"])
     i = 0
-    for name, msc in mscs.items():  # in enumerate(mscs):
-        print("Calculating Model " + spec + " for " + name)
+    if measure is None:
+        for measure, msc in mscs.items():  # in enumerate(mscs):
+            print("Calculating Model " + "for " + measure)
+            update_msc(msc, pts, dims, i, spec)
+            i = i + 1
+    else:
+        msc = mscs[measure]
+        i = regulus['measures'].index(measure)
+        print("Calculating Model " + "for " + measure)
         update_msc(msc, pts, dims, i, spec)
-        i = i + 1
 
 
 def update_msc(msc, pts, ndims, measure_ind, spec):
@@ -53,41 +59,48 @@ def update_partition(partition, idx, pts, ndims, measure_ind, spec):
 
     model = compute_model(x, y, spec)
 
-    model_key = list(model.keys())[0]
+    model_keys = list(model.keys())
 
     if 'model' not in partition:
         partition['model'] = {}
 
-    partition['model'][model_key] = model[model_key]
+    for model_key in model_keys:
+        partition['model'][model_key] = model[model_key]
 
 
-def compute_model(x, y, spec):
+def compute_model(x, y, specs):
     model = {}
-    method = MODELS[spec]['method']
-    args = MODELS[spec]['args']
+    for spec in specs:
+        method = MODELS[spec]['method']
+        args = MODELS[spec]['args']
 
-    model[spec] = method(x, y, args)
+        model[spec] = method(x, y, args)
 
     return model
 
 
-class Model(object):
-    def factory(type):
-        if type == "linear":
-            return Linear()
-        elif type == "pca":
-            return Pca()
-        raise AssertionError("Unknown Model: " + type)
-
-    factory = staticmethod(factory)
-
-
-class Pca(Model):
-
-    def compute(self, regulus):
-        update_regulus(regulus, 'pca')
+# class Model(object):
+#    def factory(type):
+#        if type == "linear":
+#            return Linear()
+#        elif type == "pca":
+#            return Pca()
+#        raise AssertionError("Unknown Model: " + type)
+#
+#    factory = staticmethod(factory)
 
 
-class Linear(Model):
-    def compute(self, regulus):
-        update_regulus(regulus, 'linear_reg')
+# class Pca(Model):
+#
+#    def compute(self, regulus):
+#        update_regulus(regulus, 'pca')
+
+
+# class Linear(Model):
+#    def compute(self, regulus):
+#        update_regulus(regulus, 'linear_reg')
+
+def create_models(regulus, spec=None, measure=None):
+    if spec is None:
+        spec = list(MODELS.keys())
+    update_regulus(regulus, spec, measure)
