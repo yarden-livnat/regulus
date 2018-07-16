@@ -57,12 +57,12 @@ def update_partition(partition, idx, pts, ndims, measure_ind, spec):
 def compute_model(x, y, spec):
     model = {}
 
-    for method in spec.keys():
-        cur_method = spec[method]['method']
-        args = spec[method]['args']
-        model[method] = cur_method(x, y, args)
+    for name in spec.keys():
+        func = spec[name]['method']
+        args = spec[name]['args']
+        model[name] = func(x, y, args)
 
-    return model
+    return model,
 
 
 def update_model(regulus, spec=None):

@@ -1,5 +1,8 @@
 import numpy as np
+# from regulus.math.linear_reg import linear_reg
+# from regulus.math.ransac import ransac
 from sklearn import linear_model
+
 
 import regulus.file as rf
 

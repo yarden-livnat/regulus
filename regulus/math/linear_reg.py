@@ -6,7 +6,7 @@ def linear_reg(x, y, args=None):
     reg.fit(x, y)
 
     model = {
-        "linear_reg": {
+        "reg": {
             "coeff": reg.coef_.tolist(),
             "intercept": reg.intercept_
         },
