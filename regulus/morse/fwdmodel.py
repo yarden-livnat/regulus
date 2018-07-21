@@ -21,7 +21,7 @@ def update_partition(partition, idx, pts, ndims, measure):
     reg = linear_model.LinearRegression()
     reg.fit(x, y)
 
-    partition['model'] = {
+    partition['models'] = {
         "linear_reg": {
             "coeff": reg.coef_.tolist(),
             "intercept": reg.intercept_
@@ -48,7 +48,7 @@ def calc_regression(mscs, pts, ndims):
 if __name__ == '__main__':
     import argparse
 
-    p = argparse.ArgumentParser(description='computer linear fwd model')
+    p = argparse.ArgumentParser(description='computer linear fwd models')
     p.add_argument('filename', help='regulus json file')
     p.add_argument('-o', '--out', help='output file')
     ns = p.parse_args()

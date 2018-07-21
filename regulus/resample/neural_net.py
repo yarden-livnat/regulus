@@ -11,9 +11,9 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 
 
-# define base model
+# define base models
 def baseline_model(X=None, Y=None, fit=True, nb_epoch=100, batch_size=5):
-    # create model
+    # create models
     model = Sequential()
 
     shape = list(X.shape)
@@ -23,7 +23,7 @@ def baseline_model(X=None, Y=None, fit=True, nb_epoch=100, batch_size=5):
     model.add(Dense(dims, input_dim=dims, kernel_initializer='normal', activation='relu'))
     model.add(Dense(int(dims / 2), kernel_initializer='normal', activation='relu'))
     model.add(Dense(1, kernel_initializer='normal'))
-    # Compile model
+    # Compile models
     model.compile(loss='mean_squared_error', optimizer='adam')
 
     if fit == True:
@@ -54,14 +54,14 @@ def baseline_model(X=None, Y=None, fit=True, nb_epoch=100, batch_size=5):
 # fix random seed for reproducibility
 # seed = 7
 # numpy.random.seed(seed)
-# evaluate model with standardized dataset
+# evaluate models with standardized dataset
 # estimator = KerasRegressor(build_fn=baseline_model, epochs=100, batch_size=5, verbose=0)
 
 # kfold = KFold(n_splits=10, random_state=seed)
 # results = cross_val_score(estimator, X, Y, cv=kfold)
 # print("Results: %.2f (%.2f) MSE" % (results.mean(), results.std()))
 
-# evaluate model with standardized dataset
+# evaluate models with standardized dataset
 
 
 # numpy.random.seed(seed)
@@ -74,6 +74,6 @@ def baseline_model(X=None, Y=None, fit=True, nb_epoch=100, batch_size=5):
 # print("Standardized: %.2f (%.2f) MSE" % (results.mean(), results.std()))
 
 
-### model.save_weights("my_model.h5")
+### models.save_weights("my_model.h5")
 
-### model.load_weights('my_model_weights.h5')
+### models.load_weights('my_model_weights.h5')

@@ -33,9 +33,10 @@ def morse(regulus, kind=None, measures=None, args=None, debug=False):
     pts = np.array(regulus['pts'])
     x = pts[:, 0:ndims]
 
-    for i, measure in enumerate(measures):
+    for measure in measures:
         try:
-            print('\npost ', measure)
+            print('\nmeasure:', measure)
+            i = regulus['measures'].index(measure)
             prev = rf.params(regulus, measure)
             params = merge(args, prev)
 
@@ -50,8 +51,9 @@ def morse(regulus, kind=None, measures=None, args=None, debug=False):
             y = msc.Y
             post = Post(debug).data(y)
 
-            if kind == None:
+            if kind is None:
                 kind = regulus['morse']['complexes'][measure]['type']
+
             if kind == 'descend':
                 post.msc(msc.descending_partitions, msc.max_hierarchy)
             elif kind == 'ascend':

@@ -48,6 +48,8 @@ def load(filename):
 def save(regulus, filename=None, data_dir=None):
     if filename is None:
         filename = regulus['attr']['path']
+    else:
+        regulus['attr']['path'] = filename
 
     with open(filename, 'w') as f:
         json.dump(regulus, f, indent=2)

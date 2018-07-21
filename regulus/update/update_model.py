@@ -51,7 +51,7 @@ def update_partition(partition, idx, pts, ndims, measure_ind, spec):
 
     model = compute_model(x, y, spec)
 
-    partition['model'] = model
+    partition['models'] = model
 
 
 def compute_model(x, y, spec):

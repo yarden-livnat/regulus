@@ -5,6 +5,7 @@ from regulus import file as rf
 from .morse import morse
 from typing import Iterable
 
+
 def parse_args(args=None):
     p = argparse.ArgumentParser(prog='morse', description='compute Morse (or Morse-Smale complex')
     p.add_argument('filename', help='regulus .json file]')
@@ -37,3 +38,7 @@ def run():
 
     filename = ns.out if ns.out is not None else ns.filename
     rf.save(regulus, filename)
+
+
+if __name__ == 'main':
+    run()

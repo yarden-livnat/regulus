@@ -2,10 +2,10 @@ import argparse
 import json
 
 import regulus.file as rf
-from regulus.update.update import defaults, update_model
+from regulus.update.update import update
 
 
-def update_model_cli():
+def update_cli():
     p = argparse.ArgumentParser()
     p.add_argument('filename', help='regulus .json file]')
     p.add_argument('-o', '--out', help='output file')
@@ -15,13 +15,12 @@ def update_model_cli():
 
     regulus = rf.load(ns.filename)
 
-    if ns.spec is None:
-        spec = defaults
-    else:
+    spec = None
+    if ns.spec is not None:
         with open(ns.spec) as f:
             spec = json.load(f)
     try:
-        update_model(regulus, spec)
+        update(regulus, spec)
         filename = ns.out if ns.out is not None else ns.filename
         rf.save(regulus, filename)
 
@@ -31,4 +30,4 @@ def update_model_cli():
 
 
 if __name__ == "__main__":
-    update_model_cli()
+    update_cli()
