@@ -1,4 +1,4 @@
-from regulus.topo.data import Data
+from regulus.data.data import Data
 from regulus.topo.morse import morse_smale
 from regulus.utils.io import save
 

@@ -29,8 +29,10 @@ class Data(object):
         values = pts.loc[:, cols[ndims:]]
         return Data(x, values, measure)
 
-    def normalize(self):
-        self.scaler = StandardScaler(copy=False)
+    def normalize(self, scaler=None):
+        if scaler is None:
+            scaler = StandardScaler(copy=False)
+        self.scaler = scaler
         self.scaler.fit_transform(self.x)
 
     def pivot(self, measure):
