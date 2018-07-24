@@ -22,7 +22,7 @@ class PartitionNode(object):
     def reset():
         PartitionNode._id_generator = -1
 
-    def __init__(self, persistence, base_pts=None, min_idx=None, max_idx=None, child=None, is_max=None):
+    def __init__(self, persistence, base_pts=None, min_idx=None, max_idx=None, from_partition=None, is_max=None):
         self.id = PartitionNode.gen_id()
         self.persistence = persistence
         self.span = []
@@ -35,11 +35,11 @@ class PartitionNode(object):
         self.max_idx = max_idx
         self.max_merge = is_max
 
-        if child is not None:
-            self.min_idx = child.min_idx
-            self.max_idx = child.max_idx
-            self.children.append(child)
-            child.parent = self
+        if from_partition is not None:
+            self.min_idx = from_partition.min_idx
+            self.max_idx = from_partition.max_idx
+            self.children.append(from_partition)
+            from_partition.parent = self
 
     def add_child(self, child):
         child.parent = self
@@ -75,34 +75,12 @@ class Builder(object):
         for entry in hierarchy:
             row = entry.split(',')
             self.merges.append(Merge(float(row[1]), row[0] == 'Maxima', int(row[2]), int(row[3])))
+            self.merges.append(Merge(float(row[1]), row[0] == 'Maxima', int(row[2]), int(row[3])))
         return self
 
     def build(self):
         self.prepare()
-        for merge in self.merges:
-            # print(merge.level, merge.is_max, merge.src, merge.dest)
-            if merge.src == merge.dest:
-                continue
-
-            # merge.dest may have been merged already (same persistence level: degenerate case)
-            # dest = merge.dest
-            # while dest in self.mapping:
-            #     dest = self.mapping[dest]
-            dest = self.current(merge.dest)
-            src = self.current(merge.src)
-
-            if src == dest:
-                print('*** loop: dest points back to src', self.find_loop(dest))
-                continue
-
-            merge.dest = dest
-            merge.src = src
-            self.mapping[merge.src] = merge.dest
-
-            if merge.is_max:
-                self.update(merge, self.max_map, lambda item: item.min_idx)
-            else:
-                self.update(merge, self.min_map, lambda item: item.max_idx)
+        self.merge()
 
         # get root
         if len(self.active) != 1:
@@ -110,24 +88,55 @@ class Builder(object):
         self.root = self.active.pop()
 
         self.single = 0
-        self.build_idx(self.root, 0)
+        idx = self.build_idx(self.root, 0)
         print('found {} singles'.format(self.single))
+        print('len(idx)=', idx)
+
+        self.test_uniques()
 
         self.pts.extend([self.root.min_idx, self.root.max_idx])
         self.rename(self.root, 0)
         return self
 
-
-
     # internal
+
+    def merge(self):
+        for record in self.merges:
+            # print(merge.level, merge.is_max, merge.src, merge.dest)
+            if record.src == record.dest:
+                continue
+
+            # merge.dest may have been merged already (same persistence level: degenerate case)
+            dest = self.current(record.dest)
+            src = self.current(record.src)
+
+            if src == dest:
+                print('*** loop: dest points back to src', self.find_loop(dest))
+                continue
+
+            record.dest = dest
+            record.src = src
+            self.mapping[record.src] = record.dest
+
+            if record.is_max:
+                self.collapse(record, self.max_map, lambda item: item.min_idx)
+            else:
+                self.collapse(record, self.min_map, lambda item: item.max_idx)
 
     def prepare(self):
         PartitionNode.reset()
         for key, value in self.base.items():
             m, x = [int(s) for s in key.split(',')]
             p = PartitionNode(0, list(value), m, x)
+            if 8343 in p.base_pts:
+                print('in span of ', p.id)
+            if 8343 == m:
+                print('min of ', p.id)
+            if 8343 == x:
+                print('max of ', p.id)
             self.add(p)
 
+        self.find_unique()
         self.remove_non_unique()
 
         self.merges.sort(key=lambda m: (m.level, m.src))
@@ -139,16 +148,23 @@ class Builder(object):
             for partition in self.active:
                 self.check_partition(partition)
 
-    def update(self, merge, idx_map, idx):
-        add = []
-        remove = set()
+    def collapse(self, merge, idx_map, idx):
+        add_partitions = []
+        remove_partitions = set()
 
         for d in idx_map[merge.dest]:
-            n = None
+            new_partition = None
             remove_src = set()
             for s in idx_map[merge.src]:
                 if idx(s) == idx(d):
-                    if s.persistence == merge.level:
+                    if s.persistence != merge.level:
+                        if new_partition is None:
+                            new_partition = PartitionNode(merge.level, from_partition=d, is_max=merge.is_max)
+                            remove_partitions.add(d)  # can't be removed during the iterations
+                            add_partitions.append(new_partition)
+                        new_partition.add_child(s)
+                    else:
+                        print('remove intermediate at ', s.persistence)
                         # s is an intermediate and should be absorbed
                         if len(s.children) == 0:
                             # s is a base partition
@@ -156,37 +172,35 @@ class Builder(object):
                         else:
                             for child in s.children:
                                 d.add_child(child)
-                    else:
-                        if n is None:
-                            n = PartitionNode(merge.level, child=d, is_max=merge.is_max)
-                            remove.add(d)  # can't be removed during the iterations
-                            add.append(n)
-                        n.add_child(s)
+                        if len(s.extrema) > 0:
+                            d.extrema.extends(s.extrema)
+                            # print("*** need to move extrema points as well.")
                     remove_src.add(s)  # can't be removed during the iterations
             for s in remove_src:
                 self.remove(s)
 
         for s in idx_map[merge.src]:
-            n = PartitionNode(merge.level, child=s)
+            # create a new partition with a single child because the max value has changed
+            new_partition = PartitionNode(merge.level, from_partition=s)
             if merge.is_max:
-                n.max_idx = merge.dest
+                new_partition.max_idx = merge.dest
             else:
-                n.min_idx = merge.dest
-            add.append(n)
+                new_partition.min_idx = merge.dest
+            add_partitions.append(new_partition)
 
-        for r in remove | idx_map[merge.src]:
+        for r in remove_partitions | idx_map[merge.src]:
             self.remove(r)
 
         # assign the eliminated extrema as an extra internal point to the first new partition
         if merge.src not in self.unique:
-            if len(add) > 0:
-                target = add[0]
+            if len(add_partitions) > 0:
+                target = add_partitions[0]
             else:
                 target = next(iter(idx_map[merge.dest]))
             target.extrema.append(merge.src)
 
-        for n in add:
-            self.add(n)
+        for new_partition in add_partitions:
+            self.add(new_partition)
 
     # consistency checks
 
@@ -231,6 +245,8 @@ class Builder(object):
             for idx in [p.min_idx, p.max_idx]:
                 if idx not in self.unique:
                     p.base_pts.remove(idx)
+                else:
+                    print(idx, 'not removed becuase it is unique')
 
     def add(self, n):
         self.min_map[n.min_idx].add(n)
@@ -267,6 +283,22 @@ class Builder(object):
 
         partition.span = (first, idx)
         return idx
+
+    def test_uniques(self):
+        for u in self.unique:
+            self.test_unique(u, self.root, 0)
+
+    def test_unique(self, u, node, lvl):
+        if u == node.min_idx:
+            print('unique {} is min_idx for node {} lvl {}'.format(u, node.id, lvl))
+        if u == node.max_idx:
+            print('unique {} is max_idx for node {} lvl {}'.format(u, node.id, lvl))
+        if u in node.extrema:
+            print('unique {} in extrema for node {} lvl {}'.format(u, node.id, lvl))
+        if node.span[0] <= u < node.span[1]:
+            print('unique {} in span for node {} lvl {}'.format(u, node.id, lvl))
+        for child in node.children:
+            self.test_unique(u, child, lvl+1)
 
     def rename(self, node, idx):
         node.id = idx

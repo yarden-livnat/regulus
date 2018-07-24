@@ -4,7 +4,7 @@ from regulus.topo.builder import Builder
 from regulus.topo.topology import Partition, Node
 
 
-def morse_smale(data, knn=100, beta=1.0, norm='feature', graph='relaxed beta skeleton', gradient='steepest',
+def morse_smale(data, knn=100, beta=1.0, norm=None, graph='relaxed beta skeleton', gradient='steepest',
                 aggregator='mean', debug=False):
     """Compute a Morse-Smale Complex"""
     msc = MSC(graph=graph, gradient=gradient, max_neighbors=knn, beta=beta, normalization=norm, aggregator=aggregator)
