@@ -1,5 +1,5 @@
 from collections import defaultdict
-from regulus.topo.topology import Partition, Node
+from regulus.topo.hierarchical_complex import Partition
 
 
 class Merge(object):
@@ -128,15 +128,15 @@ class Builder(object):
         for key, value in self.base.items():
             m, x = [int(s) for s in key.split(',')]
             p = PartitionNode(0, list(value), m, x)
-            if 8343 in p.base_pts:
-                print('in span of ', p.id)
-            if 8343 == m:
-                print('min of ', p.id)
-            if 8343 == x:
-                print('max of ', p.id)
+            # if 8343 in p.base_pts:
+            #     print('in span of ', p.id)
+            # if 8343 == m:
+            #     print('min of ', p.id)
+            # if 8343 == x:
+            #     print('max of ', p.id)
             self.add(p)
 
-        self.find_unique()
+        # self.find_unique()
         self.remove_non_unique()
 
         self.merges.sort(key=lambda m: (m.level, m.src))
@@ -173,7 +173,7 @@ class Builder(object):
                             for child in s.children:
                                 d.add_child(child)
                         if len(s.extrema) > 0:
-                            d.extrema.extends(s.extrema)
+                            d.extrema.extend(s.extrema)
                             # print("*** need to move extrema points as well.")
                     remove_src.add(s)  # can't be removed during the iterations
             for s in remove_src:
@@ -316,16 +316,6 @@ class Builder(object):
         visitor(p)
         for child in p.children:
             self.visit(child, visitor)
-
-    def tree(self):
-        def visit(p, parent):
-            partition = Partition(p.id, p.persistence, p.span, [p.min_idx, p.max_idx], p.max_merge)
-            node = Node(partition)
-            node.parent = parent
-            node.children = [visit(child, node) for child in p.children]
-            return node
-
-        return visit(self.root, None)
 
     def get_tree(self, name, params=''):
         partitions = []

@@ -1,12 +1,12 @@
 import pickle
 
-from regulus.topo.topology import Topology
+from regulus.topo.hierarchical_complex import HierarchicalComplex
 
 
 def load(filename):
     with open(filename, 'rb') as f:
         t = pickle.load(f)
-        if isinstance(t, Topology):
+        if isinstance(t, HierarchicalComplex):
             t.filename = filename
             return t
         raise Exception('file %1 is not a Topology file'.format(filename))

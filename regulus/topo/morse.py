@@ -1,7 +1,7 @@
-from regulus.topo.topology import Topology
 from topopy.MorseSmaleComplex import MorseSmaleComplex as MSC
 from regulus.topo.builder import Builder
-from regulus.topo.topology import Partition, Node
+from regulus.topo.hierarchical_complex import HierarchicalComplex, Partition
+from regulus.tree.tree import Node
 
 
 def morse_smale(data, knn=100, beta=1.0, norm=None, graph='relaxed beta skeleton', gradient='steepest',
@@ -16,22 +16,22 @@ def morse_smale(data, knn=100, beta=1.0, norm=None, graph='relaxed beta skeleton
     if debug:
         builder.verify()
 
-    topology = Topology(data)
+    topology = HierarchicalComplex(data)
     topology.tree = traverse(builder.root, None, topology)
-    topology.partitions = dict()
-    topology.tree.reduce(collect, topology.partitions)
+    # topology.partitions = dict()
+    # topology.tree.reduce(collect, topology.partitions)
 
     return topology
 
 
-def traverse(p, parent, topo):
-    partition = Partition(p.id, p.persistence, p.span, [p.min_idx, p.max_idx], p.max_merge, topo)
-    node = Node(partition)
-    node.parent = parent
-    node.children = [traverse(child, node, topo) for child in p.children]
+def traverse(p, parent, topology):
+    partition = Partition(p.id, p.persistence, p.span, [p.min_idx, p.max_idx], p.max_merge, topology)
+    node = Node(data=partition, parent=parent)
+    for child in p.children:
+        traverse(child, node, topology)
     return node
 
 
-def collect(node, partitions):
-    partitions[node.id] = node.partition
-    return partitions
+# def collect(node, partitions):
+#     partitions[node.id] = node.partition
+#     return partitions
