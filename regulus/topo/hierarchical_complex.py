@@ -1,9 +1,13 @@
 
 class HierarchicalComplex(object):
-    def __init__(self, pts, tree=None):
+    def __init__(self, pts, root=None):
         self.filename = None
         self.pts = pts
-        self.tree = tree
+        self.root = root
+
+    def apply(self, f):
+        for node in self.root:
+            f(node.data, node=node)
 
 
 class Partition(object):
@@ -19,15 +23,14 @@ class Partition(object):
         self._x = None
         self._y = None
         self._models = dict()
-        self._measures = dict()
+        self.attr = dict()
+
+    def __str__(self):
+        return str(self.id)
 
     @property
     def models(self):
         return self._models
-
-    @property
-    def measures(self):
-        return self._measures
 
     def _get_pts(self):
         idx = [*range(*self.span)]

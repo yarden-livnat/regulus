@@ -17,21 +17,23 @@ def morse_smale(data, knn=100, beta=1.0, norm=None, graph='relaxed beta skeleton
         builder.verify()
 
     topology = HierarchicalComplex(data)
-    topology.tree = traverse(builder.root, None, topology)
+    topology.root = _visit(builder.root, None, topology)
     # topology.partitions = dict()
     # topology.tree.reduce(collect, topology.partitions)
 
     return topology
 
 
-def traverse(p, parent, topology):
+def _visit(p, parent, topology):
     partition = Partition(p.id, p.persistence, p.span, [p.min_idx, p.max_idx], p.max_merge, topology)
     node = Node(data=partition, parent=parent)
     for child in p.children:
-        traverse(child, node, topology)
+        _visit(child, node, topology)
     return node
 
 
 # def collect(node, partitions):
 #     partitions[node.id] = node.partition
 #     return partitions
+
+

@@ -1,4 +1,4 @@
-from .algo import depth_first
+from .traverse import depth_first
 
 
 class Node(object):
@@ -12,6 +12,15 @@ class Node(object):
                 self.add_child(child)
         if parent:
             parent.add_child(self)
+
+    def __str__(self):
+        if id in self.data:
+            return str(self.data.id)
+        else:
+            return "<none>"
+
+    def __iter__(self):
+        return depth_first(self)
 
     @property
     def children(self):
@@ -34,24 +43,20 @@ class Node(object):
                     yield child
 
     def ancestors(self):
-        node = self.parent
-        while node:
-            yield node
-            node = node.parent
+        parent = self.parent
+        while parent:
+            yield parent
+            parent = parent.parent
 
     def leaves(self, is_leaf=lambda n:n.is_leaf()):
         for node in depth_first(self, is_leaf):
             if is_leaf(node):
                 yield node
 
-    def __iter__(self):
-        return self.items()
-
-    def items(self):
-        for node in depth_first(self):
+    def items(self, **kwargs):
+        for node in depth_first(self, **kwargs):
             if node.data is not None:
                 yield node.data
-
 
 
 class Tree(object):

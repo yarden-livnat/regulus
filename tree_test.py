@@ -1,4 +1,4 @@
-from regulus.tree.algo import *
+from regulus.tree.traverse import *
 
 
 class TestNode(Node):

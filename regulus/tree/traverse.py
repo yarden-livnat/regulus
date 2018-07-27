@@ -17,13 +17,21 @@ def breath_first(root, post=False, both=False, **kwargs):
     return breath_first_pre(root, **kwargs)
 
 
-def breath_first_pre(root, is_leaf=lambda n: n.is_leaf()):
-    queue = deque([root])
-    while queue:
-        node = queue.popleft()
-        yield node
-        if not is_leaf(node):
-            queue.extend(node.children)
+def breath_first_pre(root, is_leaf=lambda n: n.is_leaf(), with_depth=False):
+    if not with_depth:
+        queue = deque([root])
+        while queue:
+            node = queue.popleft()
+            yield node
+            if not is_leaf(node):
+                queue.extend(node.children)
+    else:
+        queue = deque([[root, 0]])
+        while queue:
+            node, depth = queue.popleft()
+            yield node, depth
+            if not is_leaf(node):
+                queue.extend(map(lambda c: [c, depth+1], node.children))
 
 
 def breath_first_post(root, is_leaf= lambda n: n.is_leaf(), both=False):
@@ -45,7 +53,10 @@ def breath_first_post(root, is_leaf= lambda n: n.is_leaf(), both=False):
         yield order.pop()
 
 
-def depth_first(root, is_leaf=lambda n: n.is_leaf(), post=False, both=False):
+def depth_first(root, is_leaf=lambda n: n.is_leaf(), post=False, both=False, depth=False):
+    if depth:
+        return depth_first_with_depth(root, is_leaf, post, both)
+
     pre = both or not post
     queue = deque()
     queue.append(root)
@@ -60,6 +71,24 @@ def depth_first(root, is_leaf=lambda n: n.is_leaf(), post=False, both=False):
                 queue.append(Visited(node))
             if not is_leaf(node):
                 queue.extend(reversed(node.children))
+
+
+def depth_first_with_depth(root, is_leaf=lambda n: n.is_leaf(), post=False, both=False):
+    pre = both or not post
+    queue = deque()
+    queue.append([root, 0])
+    while queue:
+        item = queue.pop()
+        if isinstance(item, Visited):
+            yield item.visited
+        else:
+            if pre:
+                yield item
+            if post:
+                queue.append(Visited(item))
+            node, depth = item
+            if not is_leaf(node):
+                queue.extend(map( lambda c: [c, depth+1], reversed(node.children)))
 
 
 def best_first(root, value, is_leaf=lambda n: n.is_leaf()):

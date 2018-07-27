@@ -1,7 +1,7 @@
 import argparse
 from regulus.data.data import Data
 from regulus.topo.morse import morse_smale
-from regulus.tree.algo import *
+from regulus.tree.traverse import *
 from regulus.utils import io
 
 from sklearn import linear_model
