@@ -44,9 +44,9 @@ class PartitionNode(object):
     def add_child(self, child):
         child.parent = self
         self.children.append(child)
-        if child.min_idx != self.min_idx and child.max_idx != self.max_idx:
-            print("ERROR: child {} [{} {}] merged into parent {} [{} {}] without a matching extrema".format(child.id,
-                                                    child.min_idx, child.max_idx, self.id, self.min_idx, self.max_idx))
+        # if child.min_idx != self.min_idx and child.max_idx != self.max_idx:
+        #     print("ERROR: child {} [{} {}] merged into parent {} [{} {}] without a matching extrema".format(child.id,
+        #                                             child.min_idx, child.max_idx, self.id, self.min_idx, self.max_idx))
 
 
 class Builder(object):
@@ -75,7 +75,6 @@ class Builder(object):
         for entry in hierarchy:
             row = entry.split(',')
             self.merges.append(Merge(float(row[1]), row[0] == 'Maxima', int(row[2]), int(row[3])))
-            self.merges.append(Merge(float(row[1]), row[0] == 'Maxima', int(row[2]), int(row[3])))
         return self
 
     def build(self):
@@ -102,7 +101,7 @@ class Builder(object):
 
     def merge(self):
         for record in self.merges:
-            # print(merge.level, merge.is_max, merge.src, merge.dest)
+            # print(record.level, record.is_max, record.src, record.dest)
             if record.src == record.dest:
                 continue
 
@@ -111,7 +110,6 @@ class Builder(object):
             src = self.current(record.src)
 
             if src == dest:
-                print('*** loop: dest points back to src', self.find_loop(dest))
                 continue
 
             record.dest = dest
@@ -164,7 +162,9 @@ class Builder(object):
                             add_partitions.append(new_partition)
                         new_partition.add_child(s)
                     else:
-                        print('remove intermediate at ', s.persistence)
+                        # print('remove intermediate at ', s.persistence,
+                        #       's:',s,'(',idx(s),') [',s.min_idx,',',s.max_idx,']',
+                        #       'd:', d, '[', d.min_idx, ',', d.max_idx, ']')
                         # s is an intermediate and should be absorbed
                         if len(s.children) == 0:
                             # s is a base partition
@@ -174,7 +174,6 @@ class Builder(object):
                                 d.add_child(child)
                         if len(s.extrema) > 0:
                             d.extrema.extend(s.extrema)
-                            # print("*** need to move extrema points as well.")
                     remove_src.add(s)  # can't be removed during the iterations
             for s in remove_src:
                 self.remove(s)

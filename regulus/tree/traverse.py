@@ -55,7 +55,8 @@ def breath_first_post(root, is_leaf= lambda n: n.is_leaf(), both=False):
 
 def depth_first(root, is_leaf=lambda n: n.is_leaf(), post=False, both=False, depth=False):
     if depth:
-        return depth_first_with_depth(root, is_leaf, post, both)
+        yield from depth_first_with_depth(root, is_leaf, post, both)
+        return
 
     pre = both or not post
     queue = deque()
@@ -85,7 +86,7 @@ def depth_first_with_depth(root, is_leaf=lambda n: n.is_leaf(), post=False, both
             if pre:
                 yield item
             if post:
-                queue.append(Visited(item))
+                queue.append(Visited((item, depth)))
             node, depth = item
             if not is_leaf(node):
                 queue.extend(map( lambda c: [c, depth+1], reversed(node.children)))

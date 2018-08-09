@@ -5,7 +5,7 @@ from regulus.tree.tree import Node
 
 
 def morse_smale(data, knn=100, beta=1.0, norm=None, graph='relaxed beta skeleton', gradient='steepest',
-                aggregator='mean', debug=False):
+                aggregator="mean", debug=False):
     """Compute a Morse-Smale Complex"""
     msc = MSC(graph=graph, gradient=gradient, max_neighbors=knn, beta=beta, normalization=norm, aggregator=aggregator)
     msc.build(X=data.x.values, Y=data.y.values, names=list(data.x.columns) + [data.y.name])

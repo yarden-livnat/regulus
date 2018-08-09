@@ -3,11 +3,17 @@ class HierarchicalComplex(object):
     def __init__(self, pts, root=None):
         self.filename = None
         self.pts = pts
-        self.root = root
+        self.tree = root
 
     def apply(self, f):
-        for node in self.root:
+        for node in self.tree:
             f(node.data, node=node)
+
+    def partitions(self):
+        return self.tree.items()
+
+    def nodes(self):
+        return iter(self.tree)
 
 
 class Partition(object):

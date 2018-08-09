@@ -1,19 +1,25 @@
 from .tree import Node
 
 
-def reduce(root, func, factory=Node):
+def noop(x):
+    return x
+
+
+def reduce(root, filter=noop, select=noop, factory=Node):
+
     def _reduce(node):
         children = []
         for child in node.children:
             children.extend(_reduce(child))
-        if func(node):
-            return [factory(data=node.data, children=children)]
+        if filter(node):
+            return [factory(data=select(node.data), children=children)]
         else:
             return children
 
     roots = _reduce(root)
     if len(roots) == 1:
         return roots[0]
+    # create a fake root
     return factory(children=roots)
 
 

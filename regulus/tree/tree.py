@@ -1,4 +1,5 @@
-from .traverse import depth_first
+from uuid import UUID
+from .traverse import traverse
 
 
 class Node(object):
@@ -14,13 +15,13 @@ class Node(object):
             parent.add_child(self)
 
     def __str__(self):
-        if id in self.data:
+        if 'id' in self.data:
             return str(self.data.id)
         else:
             return "<none>"
 
     def __iter__(self):
-        return depth_first(self)
+        return traverse(self)
 
     @property
     def children(self):
@@ -54,12 +55,27 @@ class Node(object):
                 yield node
 
     def items(self, **kwargs):
-        for node in depth_first(self, **kwargs):
+        for node in traverse(self, **kwargs):
             if node.data is not None:
                 yield node.data
 
+    def depth(self):
+        _depth = 0
+        for node, d in traverse(self, depth=True):
+            if d > _depth:
+                _depth = d
+        return _depth
+
+    def size(self):
+        n = 0
+        for node in traverse(self):
+            n += 1
+        return n
+
+
 
 class Tree(object):
-    def __init__(self, root=None):
+    def __init__(self, root=None, name=None):
         self.root = root
+        self.name = name if not None else UUID()
 

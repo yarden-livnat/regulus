@@ -1,4 +1,6 @@
-from regulus.tree.traverse import *
+from regulus.tree.tree import Node
+from regulus.tree import *
+
 
 
 class TestNode(Node):
@@ -9,6 +11,7 @@ class TestNode(Node):
         if self.data is None:
             return "<none>"
         return self.data
+
 
 def show(root):
     for node in depth_first(root):
@@ -37,6 +40,8 @@ n22 = TestNode(data='.2.2',parent=n2)
 print('breath first. pre')
 for n in breath_first(root):
     print(n.data)
+
+print('depth = ', root.depth())
 
 print('breath first. post')
 for n in breath_first(root, post=True):
