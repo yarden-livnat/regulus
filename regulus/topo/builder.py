@@ -1,5 +1,5 @@
 from collections import defaultdict
-from regulus.topo.hierarchical_complex import Partition
+from regulus.topo.hmsc import Partition
 
 
 class Merge(object):
@@ -372,4 +372,3 @@ class Builder(object):
         if node.persistence > 0:
             for child in node.children:
                 self.stat(child, levels)
-

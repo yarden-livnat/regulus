@@ -3,10 +3,12 @@ from .traverse import traverse
 
 
 class Node(object):
-    def __init__(self, data=None, parent=None, children=None):
+    def __init__(self, data=None, parent=None, children=None, **kwargs):
         self.data = data
         self.parent = parent
         self._children = []
+        for key in kwargs:
+            setattr(self, key, kwargs[key])
 
         if children:
             for child in children:
@@ -14,11 +16,11 @@ class Node(object):
         if parent:
             parent.add_child(self)
 
-    def __str__(self):
-        if 'id' in self.data:
-            return str(self.data.id)
-        else:
-            return "<none>"
+    # def __str__(self):
+    #     if 'id' in self.data:
+    #         return str(self.data['id'])
+    #     else:
+    #         return "<none>"
 
     def __iter__(self):
         return traverse(self)
@@ -78,4 +80,3 @@ class Tree(object):
     def __init__(self, root=None, name=None):
         self.root = root
         self.name = name if not None else UUID()
-

@@ -1,6 +1,6 @@
 from topopy.MorseSmaleComplex import MorseSmaleComplex as MSC
 from regulus.topo.builder import Builder
-from regulus.topo.hierarchical_complex import HierarchicalComplex, Partition
+from regulus.topo.hmsc import HMSC, Partition
 from regulus.tree.tree import Node
 
 
@@ -16,24 +16,17 @@ def morse_smale(data, knn=100, beta=1.0, norm=None, graph='relaxed beta skeleton
     if debug:
         builder.verify()
 
-    topology = HierarchicalComplex(data)
-    topology.root = _visit(builder.root, None, topology)
-    # topology.partitions = dict()
-    # topology.tree.reduce(collect, topology.partitions)
+    hmsc = HMSC(data)
+    hmsc.tree = _visit(builder.root, None, hmsc)
+    fake = Node(data=Partition(-1, 1, hmsc=hmsc))
+    fake.add_child(hmsc.tree)
+    
+    return hmsc
 
-    return topology
 
-
-def _visit(p, parent, topology):
-    partition = Partition(p.id, p.persistence, p.span, [p.min_idx, p.max_idx], p.max_merge, topology)
+def _visit(p, parent, hmsc):
+    partition = Partition(p.id, p.persistence, p.span, [p.min_idx, p.max_idx], p.max_merge, hmsc)
     node = Node(data=partition, parent=parent)
     for child in p.children:
-        _visit(child, node, topology)
+        _visit(child, node, hmsc)
     return node
-
-
-# def collect(node, partitions):
-#     partitions[node.id] = node.partition
-#     return partitions
-
-
