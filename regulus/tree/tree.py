@@ -1,8 +1,35 @@
 from uuid import UUID
 from .traverse import traverse
 
+class Tree(object):
+    def leaves(self, is_leaf=lambda n:n.is_leaf()):
+        for node in depth_first(self, is_leaf):
+            if is_leaf(node):
+                yield node
 
-class Node(object):
+    def items(self, **kwargs):
+        for node in traverse(self, **kwargs):
+            if node.data is not None:
+                yield node.data
+
+    def depth(self):
+        _depth = 0
+        for node, d in traverse(self, depth=True):
+            if d > _depth:
+                _depth = d
+        return _depth
+
+    def size(self):
+        n = 0
+        for node in traverse(self):
+            n += 1
+        return n
+
+    def __iter__(self):
+        return traverse(self)
+
+
+class Node(Tree):
     def __init__(self, data=None, parent=None, children=None, **kwargs):
         self.data = data
         self.parent = parent
@@ -22,8 +49,6 @@ class Node(object):
     #     else:
     #         return "<none>"
 
-    def __iter__(self):
-        return traverse(self)
 
     @property
     def children(self):
@@ -50,33 +75,3 @@ class Node(object):
         while parent:
             yield parent
             parent = parent.parent
-
-    def leaves(self, is_leaf=lambda n:n.is_leaf()):
-        for node in depth_first(self, is_leaf):
-            if is_leaf(node):
-                yield node
-
-    def items(self, **kwargs):
-        for node in traverse(self, **kwargs):
-            if node.data is not None:
-                yield node.data
-
-    def depth(self):
-        _depth = 0
-        for node, d in traverse(self, depth=True):
-            if d > _depth:
-                _depth = d
-        return _depth
-
-    def size(self):
-        n = 0
-        for node in traverse(self):
-            n += 1
-        return n
-
-
-
-class Tree(object):
-    def __init__(self, root=None, name=None):
-        self.root = root
-        self.name = name if not None else UUID()
