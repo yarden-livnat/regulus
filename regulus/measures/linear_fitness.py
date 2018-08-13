@@ -1,7 +1,7 @@
 
 
 def fitness(node, cache, models):
-    key = 'fitness:{}'.format(node.data.id),
+    key = 'fitness:{}'.format(node.data.id)
     if key not in cache:
         # print(key)
         cache[key] = models[node].score(node.data.x, node.data.y)
