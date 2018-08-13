@@ -13,7 +13,7 @@ with open('LICENSE') as f:
 
 setup(
     name='regulus',
-    version='0.2.0',
+    version='0.3.0',
     description='Regulus',
     long_description=readme(),
     author='Yarden Livnat',
