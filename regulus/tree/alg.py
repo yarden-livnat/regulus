@@ -21,16 +21,19 @@ def reduce(tree, filter=noop, select=noop, factory=Node):
         else:
             return children
 
-    roots = _reduce(tree, 0)
-    if len(roots) == 1:
-        root = roots[0]
-    else:
-        root = factory(children=roots)
-    # create a fake root
-    if tree.parent is not None:
-        fake = copy(tree.parent)
-        fake.add_child(root)
-    return root
+    root = None
+    if tree.root is not None:
+        root = _reduce(tree.root, 0)
+        # if len(roots) == 1:
+        #     root = roots[0]
+        # else:
+        #     root = roots
+        # create a fake root
+        # if tree.root.parent is not None:
+        #     sentinal = copy(tree.parent)
+        #     sentinal.add_child(root)
+
+    return tree.clone(root=root)
 
 
 def with_parent(iterator):

@@ -24,14 +24,12 @@ class Cache(object):
         key = self.key(obj)
         self.cache[key] = value
 
-
     def get(self, key):
         if key in self.cache:
-            return self.cache[key]
+            return [self.cache[key], True]
         if self.parent:
             return self.parent.get(key)
         return [None, False]
-
 
     def __iter__(self):
         return iter(self.cache)
@@ -39,10 +37,7 @@ class Cache(object):
 
     def __contains__(self, obj):
         key = self.key(obj)
-        return key in self.cache
+        return self.has(key)
 
-
-    def has(self, obj):
-        key = self.key(obj)
-        value, found = self.get(key)
-        return found
+    def has(self, key):
+        return key in self.cache or (self.parent and self.parent.has(key))

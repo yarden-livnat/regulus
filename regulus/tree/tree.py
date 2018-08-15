@@ -2,35 +2,57 @@ from uuid import UUID
 from .traverse import traverse
 
 class Tree(object):
+    def __init__(self, root=None):
+        self._root = root
+
+    @property
+    def root(self):
+        return self._root
+
+    @root.setter
+    def root(self, value):
+        self._root = value
+
+    def clone(self, root=None):
+        return Tree(root)
+
     def leaves(self, is_leaf=lambda n:n.is_leaf()):
-        for node in depth_first(self, is_leaf):
+        if self.root is None:
+            return iter(())
+        for node in depth_first(self.root, is_leaf):
             if is_leaf(node):
                 yield node
 
     def items(self, **kwargs):
-        for node in traverse(self, **kwargs):
+        if self.root is None:
+            return iter(())
+        for node in traverse(self.root, **kwargs):
             if node.data is not None:
                 yield node.data
 
     def depth(self):
         _depth = 0
-        for node, d in traverse(self, depth=True):
-            if d > _depth:
-                _depth = d
+        if self.root is not None:
+            for node, d in traverse(self.root, depth=True):
+                if d > _depth:
+                    _depth = d
         return _depth
 
     def size(self):
         n = 0
-        for node in traverse(self):
+        for node in self:
             n += 1
         return n
 
     def __iter__(self):
-        return traverse(self)
+        if self.root is None:
+            return iter(())
+        return traverse(self.root)
 
 
 class Node(Tree):
-    def __init__(self, data=None, parent=None, children=None, **kwargs):
+    def __init__(self, ref=None, data=None, parent=None, children=None, **kwargs):
+        self.ref = ref if ref is not None else data.id if data is not None else -1
         self.data = data
         self.parent = parent
         self._children = []

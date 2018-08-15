@@ -1,13 +1,12 @@
 import pickle
 from pathlib import Path
 from regulus.data.data import Data
-from regulus.topo import morse_smale
-from regulus.topo.hmsc import HMSC
+from regulus.topo import morse_smale, Regulus
 
 def load(filename):
     with open(filename, 'rb') as f:
         t = pickle.load(f)
-        if isinstance(t, HMSC):
+        if isinstance(t, Regulus):
             t.filename = filename
             return t
         raise Exception('file %1 is not a Topology file'.format(filename))

@@ -1,3 +1,3 @@
-from .hmsc import *
+from .regulus import *
 from .morse import morse_smale
 from .alg import *

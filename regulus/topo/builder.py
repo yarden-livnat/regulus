@@ -1,5 +1,5 @@
 from collections import defaultdict
-from regulus.topo.hmsc import Partition
+from regulus.topo import Partition
 
 
 class Merge(object):
