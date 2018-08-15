@@ -6,14 +6,17 @@ def dict_factory(_):
     return dict()
 
 class RegulusTree(Tree):
-    def __init__(self, regulus, root=None):
+    def __init__(self, regulus, root=None, auto=[]):
         super().__init__()
         self.attrs = Cache(parent=regulus.attrs, factory=dict_factory)
         self.regulus = regulus
         self.root = root
+        self.auto_attrs = []
+        for item in auto:
+            self.add_attr(*item)
 
     def clone(self, root=None):
-        return RegulusTree(root=root, regulus=self.regulus)
+        return RegulusTree(root=root, regulus=self.regulus, auto=self.auto_attrs)
 
     @property
     def root(self):
@@ -35,15 +38,26 @@ class RegulusTree(Tree):
             if not hasattr(node, 'offset'):
                 node.offset = 0
 
+    def add_attr(self, name, attr, key=lambda n:n.ref):
+        self.attrs[name] = Cache(key=key, factory=lambda n: attr(n, self.attrs))
+        self.auto_attrs.append([name, attr, key])
 
 
 
 class Regulus(object):
-    def __init__(self, pts, tree=None):
+    def __init__(self, pts, tree=None, auto=[]):
         self.filename = None
         self.pts = pts
         self.attrs =  Cache(factory=dict_factory)
         self.tree = tree if tree is not None else RegulusTree(regulus=self)
+        self.auto_attrs = []
+        for item in auto:
+            self.add_attr(*item)
+
+
+    def add_attr(self, name, attr, key=lambda n:n.ref):
+        self.attrs[name] = Cache(key=key, factory=lambda n: attr(n, self.attrs))
+        self.auto_attrs.append([name, attr, key])
 
 
     def apply(self, f):

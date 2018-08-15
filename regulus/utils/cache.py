@@ -3,6 +3,7 @@
 def no_op(x):
     return x
 
+
 class Cache(object):
     def __init__(self, parent=None, key=None, factory=None):
         self.parent = parent
