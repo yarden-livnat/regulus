@@ -1,5 +1,4 @@
 
-# from collections import defaultdict
 from regulus.utils.cache import Cache
 from regulus.tree import Tree, Node
 

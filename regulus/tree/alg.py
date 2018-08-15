@@ -24,15 +24,6 @@ def reduce(tree, filter=noop, select=noop, factory=Node):
     root = None
     if tree.root is not None:
         root = _reduce(tree.root, 0)
-        # if len(roots) == 1:
-        #     root = roots[0]
-        # else:
-        #     root = roots
-        # create a fake root
-        # if tree.root.parent is not None:
-        #     sentinal = copy(tree.parent)
-        #     sentinal.add_child(root)
-
     return tree.clone(root=root)
 
 

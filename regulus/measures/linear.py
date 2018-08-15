@@ -7,6 +7,8 @@ def fitness(node, _, context):
     return cache[key]
 
 def relative_fitness(use_model, use_pts, _, context):
+    if use_model.ref == -1 or use_pts.ref == -1:
+        return 1
     key = '{}.{}'.format(use_model.ref, use_pts.ref)
     cache = context['relative_fitness']
     if key not in cache:

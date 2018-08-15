@@ -17,13 +17,14 @@ def morse_smale(data, knn=100, beta=1.0, norm=None, graph='relaxed beta skeleton
         builder.verify()
 
     regulus = Regulus(data)
-    regulus.tree.root  = _visit(builder.root, None, regulus)
+    regulus.tree.root  = _visit(builder.root, None, regulus, 0)
     return regulus
 
 
-def _visit(p, parent, hmsc):
-    partition = Partition(p.id, p.persistence, p.span, [p.min_idx, p.max_idx], p.max_merge, hmsc)
-    node = Node(ref=partition.id, data=partition, parent=parent)
+def _visit(p, parent, regulus, offset):
+    partition = Partition(p.id, p.persistence, p.span, [p.min_idx, p.max_idx], p.max_merge, regulus)
+    node = Node(ref=partition.id, data=partition, parent=parent, offset=offset)
     for child in p.children:
-        _visit(child, node, hmsc)
+        _visit(child, node, regulus, offset)
+        offset += child.span[1] - child.span[0]
     return node
