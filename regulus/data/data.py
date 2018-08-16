@@ -38,3 +38,6 @@ class Data(object):
     def pivot(self, measure):
         self.measure = measure
         self.y = self.values.loc[:, measure]
+
+    def size(self):
+        return len(self.values)

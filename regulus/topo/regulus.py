@@ -1,33 +1,6 @@
 
-from regulus.utils.cache import Cache
 from regulus.tree import Tree, Node
-
-
-def _attr_key(obj):
-    if isinstance(obj,tuple):
-        return ':'.join(map(lambda o: str(o.ref), obj))
-    return obj.ref
-
-def _dict(_):
-    return dict()
-
-def f(context, func):
-    def _f(a):
-        if isinstance(a, tuple):
-            return func(context, *a)
-        return func(context, a)
-    return _f
-
-class HasAttrs(object):
-    def __init__(self, parent=None, auto=[]):
-        self.attr = Cache(parent, factory=_dict)
-        self.auto = []
-        for entry in auto:
-            self.add_attr(*entry)
-
-    def add_attr(self, name, factory, key=_attr_key):
-        self.attr[name] = Cache(key=key, factory=f(self.attr, factory))
-        self.auto.append([name, factory, key])
+from .hasattrs import HasAttrs
 
 
 
@@ -36,13 +9,10 @@ class RegulusTree(Tree, HasAttrs):
         Tree.__init__(self, root)
         HasAttrs.__init__(self, regulus.attr, auto)
         self.regulus = regulus
-        # self.set_root(root)
         self.root = root
-
 
     def clone(self, root=None):
         return RegulusTree(root=root, regulus=self.regulus, auto=self.auto)
-
 
     @property
     def root(self):
@@ -54,7 +24,7 @@ class RegulusTree(Tree, HasAttrs):
             if len(value) == 1:
                 value = value[0]
             else:
-                value = Node(ref=-1, data=Partition(-1, 1, regulus=self.regulus),
+                value = Node(ref=-1, data=Partition(-1, 1, span=[0, self.regulus.pts.size()],regulus=self.regulus),
                              children=value, offset=0)
         self._root = value
         if value is not None and value.parent is None:

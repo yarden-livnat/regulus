@@ -42,3 +42,6 @@ class Cache(object):
 
     def has(self, key):
         return key in self.cache or (self.parent and self.parent.has(key))
+
+    def values(self):
+        return dict(self.cache)
