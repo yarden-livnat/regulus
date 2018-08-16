@@ -45,9 +45,9 @@ class Tree(object):
         return n
 
     def __iter__(self):
-        if self.root is None:
+        if self._root is None:
             return iter(())
-        return traverse(self.root)
+        return traverse(self._root)
 
 
 class Node(Tree):

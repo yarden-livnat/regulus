@@ -2,25 +2,51 @@
 from regulus.utils.cache import Cache
 from regulus.tree import Tree, Node
 
-def dict_factory(_):
+
+def _attr_key(obj):
+    if isinstance(obj,tuple):
+        return ':'.join(map(lambda o: str(o.ref), obj))
+    return obj.ref
+
+def _dict(_):
     return dict()
 
-class RegulusTree(Tree):
+def f(context, func):
+    def _f(a):
+        if isinstance(a, tuple):
+            return func(context, *a)
+        return func(context, a)
+    return _f
+
+class HasAttrs(object):
+    def __init__(self, parent=None, auto=[]):
+        self.attr = Cache(parent, factory=_dict)
+        self.auto = []
+        for entry in auto:
+            self.add_attr(*entry)
+
+    def add_attr(self, name, factory, key=_attr_key):
+        self.attr[name] = Cache(key=key, factory=f(self.attr, factory))
+        self.auto.append([name, factory, key])
+
+
+
+class RegulusTree(Tree, HasAttrs):
     def __init__(self, regulus, root=None, auto=[]):
-        super().__init__()
-        self.attrs = Cache(parent=regulus.attrs, factory=dict_factory)
+        Tree.__init__(self, root)
+        HasAttrs.__init__(self, regulus.attr, auto)
         self.regulus = regulus
+        # self.set_root(root)
         self.root = root
-        self.auto_attrs = []
-        for item in auto:
-            self.add_attr(*item)
+
 
     def clone(self, root=None):
-        return RegulusTree(root=root, regulus=self.regulus, auto=self.auto_attrs)
+        return RegulusTree(root=root, regulus=self.regulus, auto=self.auto)
+
 
     @property
     def root(self):
-        return self._root
+        return super().root
 
     @root.setter
     def root(self, value):
@@ -38,26 +64,19 @@ class RegulusTree(Tree):
             if not hasattr(node, 'offset'):
                 node.offset = 0
 
-    def add_attr(self, name, attr, key=lambda n:n.ref):
-        self.attrs[name] = Cache(key=key, factory=lambda n: attr(n, self.attrs))
-        self.auto_attrs.append([name, attr, key])
+    def retrieve(self, name):
+        attr = self.attr[name]
+        for node in self:
+            attr[node]
+        return attr.cache
 
 
-
-class Regulus(object):
+class Regulus(HasAttrs):
     def __init__(self, pts, tree=None, auto=[]):
+        super().__init__()
         self.filename = None
         self.pts = pts
-        self.attrs =  Cache(factory=dict_factory)
         self.tree = tree if tree is not None else RegulusTree(regulus=self)
-        self.auto_attrs = []
-        for item in auto:
-            self.add_attr(*item)
-
-
-    def add_attr(self, name, attr, key=lambda n:n.ref):
-        self.attrs[name] = Cache(key=key, factory=lambda n: attr(n, self.attrs))
-        self.auto_attrs.append([name, attr, key])
 
 
     def apply(self, f):
@@ -97,9 +116,6 @@ class Partition(object):
     def size(self):
         return self.span[1] - self.span[0]
 
-    # @property
-    # def models(self):
-    #     return self._models
 
     def _get_pts(self):
         idx = [*range(*self.span)]

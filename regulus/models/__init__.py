@@ -13,5 +13,6 @@ class NullModel(object):
     def predict(self, x):
         return x
 
-def null_model(_):
-    return NullModel()
+
+def node_model(model):
+    return lambda context, node: model(node.data) if node.ref != -1 else NullModel()
