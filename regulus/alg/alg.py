@@ -40,5 +40,5 @@ def compute_measure(func, tree):
     context = tree.regulus.attrs
     cache = dict()
     for node in tree:
-        cache[node.ref] = func(node, local, context)
+        cache[node.id] = func(node, local, context)
     return cache

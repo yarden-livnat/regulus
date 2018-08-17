@@ -1,7 +1,7 @@
 # def cache_key(*args):
 #     if len(args) == 1:
-#         return args[0].ref
-#     return f'{args[0].ref}:{args[1].ref}'
+#         return args[0].id
+#     return f'{args[0].id}:{args[1].id}'
 #
 #
 # def cached(name, key=cache_key):
@@ -19,29 +19,23 @@
 
 # @cached('fitness')
 def fitness(context, node):
-    # print('fitness for', node.ref)
     return context['linear'][node].score(node.data.x, node.data.y)
 
 
 # @cached('relative_fitness')
 def relative_fitness(context, use_model, use_pts):
-    # print('relative fitness for', use_model.ref, use_pts.ref)
     return context['linear'][use_model].score(use_pts.data.x, use_pts.data.y)
 
 
 # @cached('parent_fiteness')
 def parent_fitness(context, node):
-    if node.ref == -1 or node.parent.ref == -1:
-        return 1
-    # print('parent fitness for', node.ref)
-    # return relative_fitness(node.parent, node, context)
+    if node.id == -1 or node.parent.id == -1:
+        return 0
     return context['relative_fitness'][node.parent, node]
 
 
 # @cached('child_fiteness')
 def child_fitness(context, node):
-    # print('child for', node.ref)
-    # return relative_fitness(node, node.parent, context)
-    if node.ref == -1 or node.parent.ref == -1:
-        return 1
+    if node.id == -1 or node.parent.id == -1:
+        return 0
     return context['relative_fitness'][node, node.parent]

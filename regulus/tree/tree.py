@@ -51,8 +51,8 @@ class Tree(object):
 
 
 class Node(Tree):
-    def __init__(self, ref=None, data=None, parent=None, children=None, **kwargs):
-        self.ref = ref if ref is not None else data.id if data is not None else -1
+    def __init__(self, id=None, data=None, parent=None, children=None, **kwargs):
+        self.id = id if id is not None else data.id if data is not None else -1
         self.data = data
         self.parent = parent
         self._children = []

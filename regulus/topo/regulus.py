@@ -24,9 +24,10 @@ class RegulusTree(Tree, HasAttrs):
             if len(value) == 1:
                 value = value[0]
             else:
-                value = Node(ref=-1, data=Partition(-1, 1, span=[0, self.regulus.pts.size()],regulus=self.regulus),
+                value = Node(ref=-1, data=Partition(-1, 1, pts_span=[0, self.regulus.pts.size()],regulus=self.regulus),
                              children=value, offset=0)
         self._root = value
+        self.attr['data_size'] = self.regulus.pts.size()
         if value is not None and value.parent is None:
             sentinal = Node(ref=-1, data=Partition(-1, 1, regulus=self.regulus),
                             children=[value], offset=0)
@@ -65,12 +66,12 @@ class Regulus(HasAttrs):
 
 
 class Partition(object):
-    def __init__(self, id_, persistence, span=None, minmax_idx=None, max_merge=False, regulus=None):
+    def __init__(self, id_, persistence, pts_span=None, minmax_idx=None, max_merge=False, regulus=None):
         self.id = id_
         self.regulus = regulus
         self.persistence = persistence
 
-        self.span = span if span is not None else [0, 0]
+        self.pts_span = pts_span if pts_span is not None else [0, 0]
         self.minmax_idx = minmax_idx if minmax_idx is not None else []
         self.max_merge = max_merge
 
@@ -84,11 +85,11 @@ class Partition(object):
 
 
     def size(self):
-        return self.span[1] - self.span[0]
+        return self.pts_span[1] - self.pts_span[0]
 
 
     def _get_pts(self):
-        idx = [*range(*self.span)]
+        idx = [*range(*self.pts_span)]
         idx.extend(self.minmax_idx)
         self._x = self.regulus.pts.x.loc[idx]
         self._y = self.regulus.pts.y[idx]

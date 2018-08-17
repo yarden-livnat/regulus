@@ -36,9 +36,9 @@ def with_parent(iterator):
         yield [node.data, node.parent.data if node.parent is not None else None]
 
 
-def filter(tree, f):
+def filter(tree, func):
     select = set()
     for node in tree:
-        if f(node):
+        if func(node):
              select.add(node.ref)
     return select
