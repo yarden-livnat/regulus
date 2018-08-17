@@ -34,3 +34,11 @@ def reduce(tree, filter=noop, select=noop, factory=Node):
 def with_parent(iterator):
     for node in iterator:
         yield [node.data, node.parent.data if node.parent is not None else None]
+
+
+def filter(tree, f):
+    select = set()
+    for node in tree:
+        if f(node):
+             select.add(node.ref)
+    return select
