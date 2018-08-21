@@ -2,8 +2,8 @@ from regulus.utils.cache import Cache
 
 def _attr_key(obj):
     if isinstance(obj,tuple):
-        return ':'.join(map(lambda o: str(o.ref), obj))
-    return obj.ref
+        return ':'.join(map(lambda o: str(o.id), obj))
+    return obj.id
 
 def _dict(_):
     return dict()
@@ -15,6 +15,7 @@ def _wrap_factory(context, func):
         return func(context, a)
     return wrapper
 
+
 class HasAttrs(object):
     def __init__(self, parent=None, auto=[]):
         self.attr = Cache(parent, factory=_dict)
@@ -24,11 +25,9 @@ class HasAttrs(object):
 
     def add_attr(self, name, factory, key=_attr_key):
         self.attr[name] = Cache(key=key, factory=_wrap_factory(self.attr, factory))
+        # self.attr[name] = Cache(key=key, factory=lambda x: factory(self.attr, x))
         self.auto.append([name, factory, key])
 
     def __contains__(self, attr):
         """check is attr in cache"""
         return attr in self.attr
-
-    def local(self):
-        return self.attr.cache
