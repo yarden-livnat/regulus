@@ -29,11 +29,12 @@ class Data(object):
         values = pts.loc[:, cols[ndims:]]
         return Data(x, values, measure)
 
-    def normalize(self, scaler=None):
+
+    def normalize(self, scaler=None, copy=False):
         if scaler is None:
-            scaler = StandardScaler(copy=False)
+            scaler = StandardScaler(copy=copy)
         self.scaler = scaler
-        self.scaler.fit_transform(self.x)
+        self.x = self.scaler.fit_transform(self.x)
 
     def pivot(self, measure):
         self.measure = measure
@@ -41,3 +42,7 @@ class Data(object):
 
     def size(self):
         return len(self.values)
+
+    @property
+    def original_x(self):
+        return self.x if self.scaler is None else self.scaler.inverse_transform(self.x, copy=True)
