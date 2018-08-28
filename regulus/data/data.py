@@ -34,7 +34,7 @@ class Data(object):
         if scaler is None:
             scaler = StandardScaler(copy=copy)
         self.scaler = scaler
-        self.x = self.scaler.fit_transform(self.x)
+        self.x = pd.DataFrame(self.scaler.fit_transform(self.x), columns=self.x.columns)
 
     def pivot(self, measure):
         self.measure = measure
@@ -45,4 +45,4 @@ class Data(object):
 
     @property
     def original_x(self):
-        return self.x if self.scaler is None else self.scaler.inverse_transform(self.x, copy=True)
+        return self.x if self.scaler is None else pd.DataFrame(self.scaler.inverse_transform(self.x, copy=True), columns=self.x.columns)

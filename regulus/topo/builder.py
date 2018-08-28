@@ -126,12 +126,6 @@ class Builder(object):
         for key, value in self.base.items():
             m, x = [int(s) for s in key.split(',')]
             p = PartitionNode(0, list(value), m, x)
-            # if 8343 in p.base_pts:
-            #     print('in span of ', p.id)
-            # if 8343 == m:
-            #     print('min of ', p.id)
-            # if 8343 == x:
-            #     print('max of ', p.id)
             self.add(p)
 
         # self.find_unique()
@@ -162,9 +156,6 @@ class Builder(object):
                             add_partitions.append(new_partition)
                         new_partition.add_child(s)
                     else:
-                        # print('remove intermediate at ', s.persistence,
-                        #       's:',s,'(',idx(s),') [',s.min_idx,',',s.max_idx,']',
-                        #       'd:', d, '[', d.min_idx, ',', d.max_idx, ']')
                         # s is an intermediate and should be absorbed
                         if len(s.children) == 0:
                             # s is a base partition

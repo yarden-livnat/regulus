@@ -8,7 +8,7 @@ def morse_smale(data, knn=100, beta=1.0, norm=None, graph='relaxed beta skeleton
                 aggregator="mean", debug=False):
     """Compute a Morse-Smale Complex"""
     msc = MSC(graph=graph, gradient=gradient, max_neighbors=knn, beta=beta, normalization=norm, aggregator=aggregator)
-    msc.build(X=data.x.values, Y=data.y.values, names=list(data.x.columns) + [data.y.name])
+    msc.build(X=data.x.values, Y=data.y, names=list(data.x.columns) + [data.y.name])
     x = msc.X
     y = msc.Y
     builder = Builder(debug).data(y).msc(msc.base_partitions, msc.hierarchy)
@@ -16,7 +16,7 @@ def morse_smale(data, knn=100, beta=1.0, norm=None, graph='relaxed beta skeleton
     if debug:
         builder.verify()
 
-    regulus = Regulus(data)
+    regulus = Regulus(data, builder.pts)
     regulus.tree.root  = _visit(builder.root, None, regulus, 0)
     return regulus
 
