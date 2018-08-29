@@ -6,7 +6,12 @@ def noop(x):
     return x
 
 
-def reduce(tree, filter=noop, select=noop, factory=Node):
+def with_parent(iterator):
+    for node in iterator:
+        yield [node.data, node.parent.data if node.parent is not None else None]
+
+
+def reduce_tree(tree, filter=noop, select=noop, factory=Node):
 
     def _reduce(node, offset, depth):
         # print('.'*depth, node.ref,' #children:',len(node.children))
@@ -27,21 +32,17 @@ def reduce(tree, filter=noop, select=noop, factory=Node):
     return tree.clone(root=root)
 
 
-def with_parent(iterator):
-    for node in iterator:
-        yield [node.data, node.parent.data if node.parent is not None else None]
-
-
-def filter(tree, func):
-    select = set()
-    for node in tree:
-        if func(node):
-             select.add(node.ref)
-    return select
-
-def tree_filter(tree, func):
+def filter_tree(tree, func):
     select = set()
     for node in tree:
         if func(tree, node):
-             select.add(node.ref)
+             select.add(node.id)
     return select
+
+#
+# def tree_filter(tree, func):
+#     select = set()
+#     for node in tree:
+#         if func(tree, node):
+#              select.add(node.ref)
+#     return select

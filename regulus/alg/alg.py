@@ -1,7 +1,7 @@
 from regulus.utils.cache import Cache
 from regulus.models import NullModel
-from regulus.tree import reduce as _reduce, Node
-from regulus.topo import Partition
+# from regulus.tree import reduce_tree Node
+# from regulus.topo import Partition
 
 
 def model_cache(model):
