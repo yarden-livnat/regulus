@@ -13,12 +13,12 @@ with open('LICENSE') as f:
 
 setup(
     name='regulus',
-    version='0.3.0',
+    version='0.3.1',
     description='Regulus',
     long_description=readme(),
     author='Yarden Livnat',
     author_email='yarden@sci.utah.edu',
-    url='https://github.com/yarden_livnat/regulus.py',
+    url='https://github.com/yarden_livnat/regulus',
     license=license,
     zip_safe=False,
     packages=find_packages(exclude=('tests', 'docs')),
