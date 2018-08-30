@@ -9,22 +9,27 @@ from regulus.models import *
 
 
 def load(filename):
-    with open(filename, 'rb') as f:
+    path = Path(filename).with_suffix('.regulus')
+    with open(path, 'rb') as f:
         t = pickle.load(f)
         if isinstance(t, Regulus):
-            t.filename = filename
+            t.filename = path
             return t
-        raise Exception('file %1 is not a Topology file'.format(filename))
+        raise Exception('file %1 is not a Regulus file'.format(filename))
 
 
-def save(topology, filename=None):
-    if topology.filename is None:
-        topology.filename = filename
+def save(regulus, filename=None):
+    if filename is None and regulus.filename is None:
+        raise(Exception("Filename must be provide when the Regulus object doesn't have a default filename))
+
     if filename is None:
-        filename = topology.filename
+        filename = regulus.filename
+    path = Path(filename).with_suffix('.regulus')
+    if regulus.filename is None:
+        regulus.filename = path
 
-    with open(filename, 'wb') as f:
-        pickle.dump(topology, f)
+    with open(path, 'wb') as f:
+        pickle.dump(regulus, f)
 
 
 def from_csv(filename, **kwargs):
@@ -47,7 +52,7 @@ def from_csv(filename, **kwargs):
     regulus.tree.add_attr('rel_size', node_relative_size)
     regulus.tree.add_attr('span', node_span)
 
-    save(regulus, filename=f'{filename}.p')
+    save(regulus, filename=f'{filename}.regulus')
     t_end = process_time()
     print(f'time: {t_end - t_start:.3} read:{t_read-t_start:.3} msc:{t_msc-t_read:.3}  save:{t_end-t_msc:.3}')
     return regulus
