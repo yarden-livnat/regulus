@@ -45,3 +45,8 @@ class Cache(object):
 
     def values(self):
         return dict(self.cache)
+
+    def __getstate__(self):
+         state = self.__dict__.copy()
+         del state['factory']
+         return state

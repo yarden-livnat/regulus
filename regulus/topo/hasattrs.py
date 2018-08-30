@@ -25,9 +25,13 @@ class HasAttrs(object):
 
     def add_attr(self, name, factory, key=_attr_key):
         self.attr[name] = Cache(key=key, factory=_wrap_factory(self.attr, factory))
-        # self.attr[name] = Cache(key=key, factory=lambda x: factory(self.attr, x))
         self.auto.append([name, factory, key])
 
     def __contains__(self, attr):
         """check is attr in cache"""
         return attr in self.attr
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        for name, factory, key in self.auto:
+            self.attr[name].factory = _wrap_factory(self.attr, factory)
