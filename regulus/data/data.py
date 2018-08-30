@@ -6,14 +6,7 @@ class Data(object):
     def __init__(self, x, values, measure=None):
         self.x = pd.DataFrame(x)
         self.values = pd.DataFrame(values)
-        self.y = None
-        self.measure = None
         self.scaler = None
-
-        if measure is None:
-            measure = list(self.values.columns)[-1]
-
-        self.pivot(measure)
 
     @staticmethod
     def read_csv(filename, ndims=None, measure=None):
@@ -36,13 +29,13 @@ class Data(object):
         self.scaler = scaler
         self.x = pd.DataFrame(self.scaler.fit_transform(self.x), columns=self.x.columns)
 
-    def pivot(self, measure):
-        self.measure = measure
-        self.y = self.values.loc[:, measure]
-
     def size(self):
         return len(self.values)
 
     @property
     def original_x(self):
         return self.x if self.scaler is None else pd.DataFrame(self.scaler.inverse_transform(self.x, copy=True), columns=self.x.columns)
+
+
+    def y(self, measure):
+        return self.values.loc[:, measure]

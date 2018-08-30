@@ -43,12 +43,13 @@ class RegulusTree(Tree, HasAttrs):
 
 
 class Regulus(HasAttrs):
-    def __init__(self, pts, pts_loc, tree=None, auto=[]):
+    def __init__(self, pts, pts_loc, measure, tree=None, auto=[]):
         super().__init__()
         self.filename = None
         self.pts = pts
         self.pts_loc = pts_loc
-        self.measure = pts.measure
+        self.measure = measure
+        self.y = pts.y(measure)
         self.tree = tree if tree is not None else RegulusTree(regulus=self)
 
 
@@ -79,8 +80,6 @@ class Partition(object):
 
         self._x = None
         self._y = None
-        # self.models = dict()
-        # self.measures = dict()
 
     def __str__(self):
         return str(self.id)
@@ -89,13 +88,12 @@ class Partition(object):
     def size(self):
         return self.pts_span[1] - self.pts_span[0]
 
-
     def _get_pts(self):
         loc = self.regulus.pts_loc
         idx = [loc[i] for i in range(*self.pts_span)]
         idx.extend(self.minmax_idx)
         self._x = self.regulus.pts.x.loc[idx]
-        self._y = self.regulus.pts.y[idx]
+        self._y = self.regulus.y[idx]
 
     @property
     def x(self):
@@ -112,5 +110,3 @@ class Partition(object):
     def gc(self):
         self._x = None
         self._y = None
-        # self.models = dict()
-        # self.measures = dict()

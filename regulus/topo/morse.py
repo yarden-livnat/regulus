@@ -4,19 +4,26 @@ from regulus.topo import Regulus, Partition, RegulusTree
 from regulus.tree import Node
 
 
-def morse_smale(data, knn=100, beta=1.0, norm=None, graph='relaxed beta skeleton', gradient='steepest',
+def morse_smale(data, measure=None, knn=100, beta=1.0, norm=None, graph='relaxed beta skeleton', gradient='steepest',
                 aggregator="mean", debug=False):
+    if measure is None:
+        measure = list(data.values.columns)[-1]
+    if type(measure) == int:
+        measure = list(data.values.columns)[measure]
+
+    y = data.values.loc[:, measure]
+
     """Compute a Morse-Smale Complex"""
     msc = MSC(graph=graph, gradient=gradient, max_neighbors=knn, beta=beta, normalization=norm, aggregator=aggregator)
-    msc.build(X=data.x.values, Y=data.y, names=list(data.x.columns) + [data.y.name])
-    x = msc.X
-    y = msc.Y
+    msc.build(X=data.x.values, Y=y, names=list(data.x.columns) + [y.name])
+    # x = msc.X
+    # y = msc.Y
     builder = Builder(debug).data(y).msc(msc.base_partitions, msc.hierarchy)
     builder.build()
     if debug:
         builder.verify()
 
-    regulus = Regulus(data, builder.pts)
+    regulus = Regulus(data, builder.pts, measure)
     regulus.tree.root  = _visit(builder.root, None, regulus, 0)
     return regulus
 
