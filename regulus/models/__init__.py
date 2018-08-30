@@ -8,7 +8,7 @@ class NullModel(object):
         pass
 
     def score(self, x, y):
-        return 0;
+        return 0
 
     def predict(self, x):
         return x
