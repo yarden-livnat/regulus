@@ -34,8 +34,9 @@ def save(regulus, filename=None):
 
 def from_csv(filename, **kwargs):
     t_start = process_time()
+    path = Path(filename)
     ndims = kwargs.pop('ndims', None)
-    pts = Data.read_csv(f'{filename}.csv',ndims=ndims)
+    pts = Data.read_csv(path.with_suffix('.csv'),ndims=ndims)
     t_read = process_time()
 
     pts.normalize()
@@ -52,7 +53,7 @@ def from_csv(filename, **kwargs):
     regulus.tree.add_attr('rel_size', node_relative_size)
     regulus.tree.add_attr('span', node_span)
 
-    save(regulus, filename=f'{filename}.regulus')
+    save(regulus, filename=path.with_suffix('.regulus')')
     t_end = process_time()
     print(f'time: {t_end - t_start:.3} read:{t_read-t_start:.3} msc:{t_msc-t_read:.3}  save:{t_end-t_msc:.3}')
     return regulus
