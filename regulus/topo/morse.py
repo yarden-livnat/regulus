@@ -1,4 +1,7 @@
+import pandas as pd
 from topopy.MorseSmaleComplex import MorseSmaleComplex as MSC
+from topopy.TopologicalObject import TopologicalObject
+
 from regulus.topo.builder import Builder
 from regulus.topo import Regulus, Partition, RegulusTree
 from regulus.tree import Node
@@ -11,13 +14,17 @@ def morse_smale(data, measure=None, knn=100, beta=1.0, norm=None, graph='relaxed
     if type(measure) == int:
         measure = list(data.values.columns)[measure]
 
+    x, values = TopologicalObject.aggregate_duplicates(data.x.values, data.values.values)
+    if x.shape != data.x.shape:
+        data.x = pd.DataFrame(x, columns=data.x.columns)
+        data.values = pd.DataFrame(values, columns=data.values.columns)
+
     y = data.values.loc[:, measure]
 
     """Compute a Morse-Smale Complex"""
     msc = MSC(graph=graph, gradient=gradient, max_neighbors=knn, beta=beta, normalization=norm, aggregator=aggregator)
     msc.build(X=data.x.values, Y=y, names=list(data.x.columns) + [y.name])
-    # x = msc.X
-    # y = msc.Y
+
     builder = Builder(debug).data(y).msc(msc.base_partitions, msc.hierarchy)
     builder.build()
     if debug:

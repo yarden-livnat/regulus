@@ -20,7 +20,7 @@ def load(filename):
 
 def save(regulus, filename=None):
     if filename is None and regulus.filename is None:
-        raise(Exception("Filename must be provide when the Regulus object doesn't have a default filename))
+        raise(Exception("Filename must be provide when the Regulus object doesn't have a default filename"))
 
     if filename is None:
         filename = regulus.filename
@@ -53,7 +53,7 @@ def from_csv(filename, **kwargs):
     regulus.tree.add_attr('rel_size', node_relative_size)
     regulus.tree.add_attr('span', node_span)
 
-    save(regulus, filename=path.with_suffix('.regulus')')
+    save(regulus, filename=path.with_suffix('.regulus'))
     t_end = process_time()
     print(f'time: {t_end - t_start:.3} read:{t_read-t_start:.3} msc:{t_msc-t_read:.3}  save:{t_end-t_msc:.3}')
     return regulus
