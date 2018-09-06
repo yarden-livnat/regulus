@@ -23,7 +23,7 @@ def morse_smale(data, measure=None, knn=100, beta=1.0, norm=None, graph='relaxed
 
     """Compute a Morse-Smale Complex"""
     msc = MSC(graph=graph, gradient=gradient, max_neighbors=knn, beta=beta, normalization=norm, aggregator=aggregator)
-    msc.build(X=data.x.values, Y=y, names=list(data.x.columns) + [y.name])
+    msc.build(X=data.x.values, Y=y.values, names=list(data.x.columns) + [y.name])
 
     builder = Builder(debug).data(y).msc(msc.base_partitions, msc.hierarchy)
     builder.build()
