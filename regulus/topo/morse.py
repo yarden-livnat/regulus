@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 import pandas as pd
 from topopy.MorseSmaleComplex import MorseSmaleComplex as MSC
 from topopy.TopologicalObject import TopologicalObject
@@ -6,9 +7,18 @@ from regulus.topo.builder import Builder
 from regulus.topo import Regulus, Partition, RegulusTree
 from regulus.tree import Node
 
+defaults = SimpleNamespace(
+        knn: 100,
+        beta: 1,
+        norm: None,
+        graph:' relaxed beta skeleton',
+        gradient: 'steepest',
+        aggregator: 'mean'
+)
 
-def morse_smale(data, measure=None, knn=100, beta=1.0, norm=None, graph='relaxed beta skeleton', gradient='steepest',
-                aggregator="mean", debug=False):
+def morse_smale(data, measure=None, knn=defaults.knn, beta=defaults.beta, norm=defaults.norm, graph=defaults.graph,
+                gradient=defaults.gradient, aggregator=defaults.aggregator, debug=False):
+
     if measure is None:
         measure = list(data.values.columns)[-1]
     if type(measure) == int:
