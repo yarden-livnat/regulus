@@ -71,10 +71,11 @@ class Builder(object):
         return self
 
     def msc(self, base, hierarchy):
+        _, maxima = zip(*base.keys())
+        maxima = set(maxima)
         self.base = base
-        for entry in hierarchy:
-            row = entry.split(',')
-            self.merges.append(Merge(float(row[1]), row[0] == 'Maxima', int(row[2]), int(row[3])))
+        for dying, (persistence, surviving, saddle) in hierarchy.items():
+            self.merges.append(Merge(persistence, dying in maxima, surviving, saddle))
         return self
 
     def build(self):
