@@ -1,3 +1,6 @@
+import numpy as np
+from sklearn import linear_model as lm
+
 # def cache_key(*args):
 #     if len(args) == 1:
 #         return args[0].id
@@ -20,6 +23,21 @@
 # @cached('fitness')
 def fitness(context, node):
     return context['linear'][node].score(node.data.x, node.data.y)
+
+
+# @cached('stepwise_fitness')
+def stepwise_fitness(context, node):
+    fitnesses = []
+    coefficients = np.fabs(context['linear'][node].coef_)
+    sorted_dims = np.argsort(coefficients)
+    for i in range(len(sorted_dims)):
+        subspace = sorted_dims[:(i+1)]
+        model = lm.LinearRegression()
+        X = node.data.x[:, subspace]
+        Y = node.data.y
+        model.fit(X, Y)
+        fitnesses.append((sorted_dims[i], model.score(X, Y)))
+    return fitnesses
 
 
 # @cached('relative_fitness')
