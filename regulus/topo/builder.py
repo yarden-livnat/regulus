@@ -124,8 +124,7 @@ class Builder(object):
 
     def prepare(self):
         PartitionNode.reset()
-        for key, value in self.base.items():
-            m, x = [int(s) for s in key.split(',')]
+        for (m, x), value in self.base.items():
             p = PartitionNode(0, list(value), m, x)
             self.add(p)
 
