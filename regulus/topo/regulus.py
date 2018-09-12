@@ -90,7 +90,7 @@ class Partition(object):
 
     def _get_pts(self):
         loc = self.regulus.pts_loc
-        idx = [loc[i] for i in range(*self.pts_span)]
+        idx = [loc[i] for i in range(self.pts_span[0], self.pts_span[1]-1)]
         idx.extend(self.minmax_idx)
         self._x = self.regulus.pts.x.loc[idx]
         self._y = self.regulus.y[idx]
