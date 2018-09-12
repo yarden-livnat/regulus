@@ -8,12 +8,12 @@ from regulus.topo import Regulus, Partition, RegulusTree
 from regulus.tree import Node
 
 defaults = SimpleNamespace(
-        knn: 100,
-        beta: 1,
-        norm: None,
-        graph:' relaxed beta skeleton',
-        gradient: 'steepest',
-        aggregator: 'mean'
+        knn=100,
+        beta=1,
+        norm=None,
+        graph='relaxed beta skeleton',
+        gradient='steepest',
+        aggregator= 'mean'
 )
 
 def morse_smale(data, measure=None, knn=defaults.knn, beta=defaults.beta, norm=defaults.norm, graph=defaults.graph,
