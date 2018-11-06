@@ -3,24 +3,24 @@ from sklearn.preprocessing import StandardScaler
 
 
 class Data(object):
-    def __init__(self, x, values, measure=None):
+    def __init__(self, x, values):
         self.x = pd.DataFrame(x)
         self.values = pd.DataFrame(values)
         self.scaler = None
 
     @staticmethod
-    def read_csv(filename, ndims=None, measure=None):
-        return Data.from_pts(pd.read_csv(filename), ndims=ndims, measure=measure)
+    def read_csv(filename, ndims=None):
+        return Data.from_pts(pd.read_csv(filename), ndims=ndims)
 
     @staticmethod
-    def from_pts(pts, cols=None, ndims=None, measure=None):
+    def from_pts(pts, cols=None, ndims=None):
         pts = pd.DataFrame(pts, columns=cols)
         if ndims is None:
             ndims = pts.shape[1]-1
         cols = list(pts.columns)
         x = pts.loc[:, cols[:ndims]]
         values = pts.loc[:, cols[ndims:]]
-        return Data(x, values, measure)
+        return Data(x, values)
 
 
     def normalize(self, scaler=None, copy=False):
