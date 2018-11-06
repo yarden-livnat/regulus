@@ -36,7 +36,7 @@ def from_csv(filename, **kwargs):
     t_start = process_time()
     path = Path(filename)
     ndims = kwargs.pop('ndims', None)
-    pts = Data.read_csv(path.with_suffix('.csv'),ndims=ndims)
+    pts = Data.read_csv(path.with_suffix('.csv'), ndims=ndims)
     t_read = process_time()
 
     pts.normalize()
@@ -45,6 +45,7 @@ def from_csv(filename, **kwargs):
 
     regulus.add_attr('linear', linear_model)
     regulus.add_attr('fitness', fitness)
+    regulus.add_attr('stepwise_fitness', stepwise_fitness)
     regulus.add_attr('relative_fitness', relative_fitness)
 
     regulus.tree.add_attr('parent_fitness', parent_fitness)
