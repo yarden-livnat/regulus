@@ -90,11 +90,11 @@ class Tree(object):
         return _depth
 
     def reduce(self, filter, factory=Node):
-        def _reduce(node, offset, depth):
+        def _reduce(node, offset):
             children = []
             child_offset = offset
             for child in node.children:
-                children.extend(_reduce(child, child_offset, depth+1))
+                children.extend(_reduce(child, child_offset))
                 child_offset += child.data.size()
             if filter(self, node):
                 return [factory(data=node.data, children=children, offset=offset)]
@@ -105,6 +105,26 @@ class Tree(object):
         if self.root is not None:
             root = _reduce(self.root, 0, 0)
         return self.clone(root)
+
+
+    def prune(self, filter, factory=Node):
+        def _prune(node, offset, depth):
+            if not filter(self, node):
+                return None
+            children = []
+            child_offeet = offset
+            for child in node.children:
+                c = _prune(child, child_offset, depth+1)
+                if c is not None:
+                    children.append(c)
+                    child_offset += c.data.size()
+            return factory(data=node.data, children=children,offset=offset)
+
+        root = None
+        if self.root is not None:
+            root = _prune(self.root, 0, 0)
+        return self.clone(root)
+
 
     def filter(self, f):
         select = set()
