@@ -71,11 +71,10 @@ class Builder(object):
         return self
 
     def msc(self, base, hierarchy):
-        _, maxima = zip(*base.keys())
-        maxima = set(maxima)
         self.base = base
-        for dying, (persistence, surviving, saddle) in hierarchy.items():
-            self.merges.append(Merge(persistence, dying in maxima, dying, surviving))
+        for entry in hierarchy:
+            row = entry.split(',')
+            self.merges.append(Merge(float(row[1]), row[0] == 'Maxima', int(row[2]), int(row[3])))
         return self
 
     def build(self):
@@ -124,12 +123,9 @@ class Builder(object):
 
     def prepare(self):
         PartitionNode.reset()
-        for (m, x), value in self.base.items():
-            # This should not be necessary (the addition of the
-            # extrema), but it causes an issue below in
-            # remove_non_unique, if I don't do it.
-            indices = sorted(list(set(value.tolist() + [m, x])))
-            p = PartitionNode(0, indices, m, x)
+        for key, value in self.base.items():
+            m, x = [int(s) for s in key.split(',')]
+            p = PartitionNode(0, list(value), m, x)
             self.add(p)
 
         # self.find_unique()

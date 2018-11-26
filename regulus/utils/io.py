@@ -3,7 +3,7 @@ from pathlib import Path
 from time import process_time
 
 from regulus.data.data import Data
-from regulus.topo import morse_smale, Regulus
+from regulus.topo import msc, Regulus
 from regulus.measures import *
 from regulus.models import *
 
@@ -37,7 +37,7 @@ def add_defaults(regulus):
     regulus.add_attr('fitness', fitness)
     regulus.add_attr('relative_fitness', relative_fitness)
     regulus.add_attr('stepwise_fitness', stepwise_fitness)
-    
+
     regulus.tree.add_attr('parent_fitness', parent_fitness)
     regulus.tree.add_attr('child_fitness', child_fitness)
     regulus.tree.add_attr('size', node_size)
@@ -52,12 +52,12 @@ def from_csv(filename, **kwargs):
     t_read = process_time()
 
     pts.normalize()
-    regulus = morse_smale(pts, **kwargs)
+    regulus = msc(pts, **kwargs)
     t_msc = process_time()
 
     add_defaults(regulus)
 
-    save(regulus, filename=path.with_suffix('.regulus'))
+    # save(regulus, filename=path.with_suffix('.regulus'))
     t_end = process_time()
     print(f'time: {t_end - t_start:.3} read:{t_read-t_start:.3} msc:{t_msc-t_read:.3}  save:{t_end-t_msc:.3}')
     return regulus

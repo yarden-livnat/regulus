@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 import pandas as pd
-from topopy.MorseSmaleComplex import MorseSmaleComplex as MSC
+from topopy.MorseSmaleComplex import MorseSmaleComplex
 from topopy.TopologicalObject import TopologicalObject
 
 from regulus.topo.builder import Builder
@@ -16,14 +16,16 @@ defaults = SimpleNamespace(
         aggregator= 'mean'
 )
 
-def morse_smale(data, measure=None, knn=defaults.knn, beta=defaults.beta, norm=defaults.norm, graph=defaults.graph,
+def msc(data, type='smale', measure=None, knn=defaults.knn, beta=defaults.beta, norm=defaults.norm, graph=defaults.graph,
                 gradient=defaults.gradient, aggregator=defaults.aggregator, debug=False):
-
     if measure is None:
         measure = list(data.values.columns)[-1]
-    if type(measure) == int:
+    elif type(measure) == int:
         measure = list(data.values.columns)[measure]
 
+    # TODO: that's an unexpected side-effect.
+    #       either make the user do this step outside of this function or
+    #       povide a parameter to explicitly ask for that
     x, values = TopologicalObject.aggregate_duplicates(data.x.values, data.values.values)
     if x.shape != data.x.shape:
         data.x = pd.DataFrame(x, columns=data.x.columns)
@@ -32,15 +34,21 @@ def morse_smale(data, measure=None, knn=defaults.knn, beta=defaults.beta, norm=d
     y = data.values.loc[:, measure]
 
     """Compute a Morse-Smale Complex"""
-    msc = MSC(graph=graph, gradient=gradient, max_neighbors=knn, beta=beta, normalization=norm, aggregator=aggregator)
-    msc.build(X=data.x.values, Y=y.values)
+    topo = MorseSmaleComplex(graph=graph, gradient=gradient, max_neighbors=knn, beta=beta, normalization=norm, aggregator=aggregator)
+    topo.build(X=data.x.values, Y=y.values, names=list(data.x.columns)+[y.name])
 
-    builder = Builder(debug).data(y).msc(msc.base_partitions, msc.merge_sequence)
+    builder = Builder(debug).data(y)
+    if type == 'smale':
+        builder.msc(topo.base_partitions, topo.hierarchy)
+    elif type == 'descend':
+        builder.msc(topo.descending_partitions, topo.max_hierarchy)
+    else:
+        builder.msc(topo.ascending_partitions, topo.min_hierarchy)
     builder.build()
     if debug:
         builder.verify()
 
-    regulus = Regulus(data, builder.pts, measure)
+    regulus = Regulus(data, builder.pts, measure, type=type)
     regulus.tree.root  = _visit(builder.root, None, regulus, 0)
     return regulus
 
@@ -52,3 +60,10 @@ def _visit(p, parent, regulus, offset):
         _visit(child, node, regulus, offset)
         offset += child.span[1] - child.span[0]
     return node
+
+
+def morse_smale(data, **kwargs):
+    return msc(data, type='smale', **kwargs)
+
+def morse(data, type='descend', **kwargs):
+    return msc(data, type, **kwargs)

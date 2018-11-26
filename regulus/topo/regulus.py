@@ -2,7 +2,31 @@
 from regulus.tree import Tree, Node
 from .hasattrs import HasAttrs
 
+class Regulus(HasAttrs):
+    def __init__(self, pts, pts_loc, measure, tree=None, type='smale', auto=[]):
+        super().__init__()
+        self.type = type
+        self.filename = None
+        self.pts = pts
+        self.pts_loc = pts_loc
+        self.measure = measure
+        self.y = pts.y(measure)
+        self.tree = tree if tree is not None else RegulusTree(regulus=self)
 
+
+    def apply(self, f):
+        for node in self.tree:
+            f(node.data, node=node)
+
+    def partitions(self):
+        return self.tree.items()
+
+    def nodes(self):
+        return iter(self.tree)
+
+    def gc(self):
+        for p in self.partitions():
+            p.gc()
 
 class RegulusTree(Tree, HasAttrs):
     def __init__(self, regulus, root=None, auto=[]):
@@ -42,30 +66,7 @@ class RegulusTree(Tree, HasAttrs):
         return attr.cache
 
 
-class Regulus(HasAttrs):
-    def __init__(self, pts, pts_loc, measure, tree=None, auto=[]):
-        super().__init__()
-        self.filename = None
-        self.pts = pts
-        self.pts_loc = pts_loc
-        self.measure = measure
-        self.y = pts.y(measure)
-        self.tree = tree if tree is not None else RegulusTree(regulus=self)
 
-
-    def apply(self, f):
-        for node in self.tree:
-            f(node.data, node=node)
-
-    def partitions(self):
-        return self.tree.items()
-
-    def nodes(self):
-        return iter(self.tree)
-
-    def gc(self):
-        for p in self.partitions():
-            p.gc()
 
 
 class Partition(object):
