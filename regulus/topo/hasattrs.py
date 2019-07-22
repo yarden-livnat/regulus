@@ -23,9 +23,14 @@ class HasAttrs(object):
         for entry in auto:
             self.add_attr(*entry)
 
-    def add_attr(self, name, factory, key=_attr_key):
-        self.attr[name] = Cache(key=key, factory=_wrap_factory(self.attr, factory))
-        self.auto.append([name, factory, key])
+    def add_attr(self, name, factory, key=_attr_key, **kwargs):
+        self.attr[name] = Cache(key=key, factory=_wrap_factory(self.attr, factory), **kwargs)
+        for i, entry in enumerate(self.auto):
+            if entry[0] == name:
+                self.auto[i] = [name, factory, key]
+                break
+        else:
+            self.auto.append([name, factory, key])
 
     def __contains__(self, attr):
         """check is attr in cache"""

@@ -29,9 +29,9 @@ class Regulus(HasAttrs):
             p.gc()
 
 class RegulusTree(Tree, HasAttrs):
-    def __init__(self, regulus, root=None, auto=[]):
+    def __init__(self, regulus, root=None, auto=None):
         Tree.__init__(self, root)
-        HasAttrs.__init__(self, regulus.attr, auto)
+        HasAttrs.__init__(self, regulus.attr, auto or [])
         self.regulus = regulus
         self.root = root
 
@@ -62,7 +62,7 @@ class RegulusTree(Tree, HasAttrs):
     def retrieve(self, name):
         attr = self.attr[name]
         for node in self:
-            attr[node]
+            attr[node]  # ensure data is computed
         return attr.cache
 
 
@@ -107,6 +107,12 @@ class Partition(object):
         if self._y is None:
             self._get_pts()
         return self._y
+
+    def max(self):
+        return self.regulus.y[self.minmax_idx[1]]
+
+    def min(self):
+        return self.regulus.y[self.minmax_idx[0]]
 
     def gc(self):
         self._x = None

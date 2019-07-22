@@ -5,11 +5,12 @@ def no_op(x):
 
 
 class Cache(object):
-    def __init__(self, parent=None, key=None, factory=None):
+    def __init__(self, parent=None, key=None, factory=None, **kwargs):
         self.parent = parent
         self.factory = factory if not None else no_op
         self.cache = dict()
         self.key = key if key is not None else no_op
+        self.properties = kwargs
 
     def __getitem__(self, obj):
         key = self.key(obj)

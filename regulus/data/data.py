@@ -36,6 +36,8 @@ class Data(object):
     def original_x(self):
         return self.x if self.scaler is None else pd.DataFrame(self.scaler.inverse_transform(self.x, copy=True), columns=self.x.columns)
 
+    def inverse(self, x):
+        return x if self.scaler is None else pd.DataFrame(self.scaler.inverse_transform(x, copy=True), columns=x.columns)
 
     def y(self, measure):
         return self.values.loc[:, measure]

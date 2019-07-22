@@ -134,11 +134,19 @@ class Tree(object):
         return select
 
 
+    def find(self, f):
+        for node in self:
+            if f(self, node):
+                return node
+        return None
+
+
     def size(self):
         n = 0
         for node in self:
             n += 1
         return n
+
 
     def __iter__(self):
         if self._root is None:
