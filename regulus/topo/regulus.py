@@ -2,6 +2,7 @@
 from regulus.tree import Tree, Node
 from .hasattrs import HasAttrs
 
+
 class Regulus(HasAttrs):
     def __init__(self, pts, pts_loc, measure, tree=None, type='smale', auto=[]):
         super().__init__()
@@ -12,7 +13,6 @@ class Regulus(HasAttrs):
         self.measure = measure
         self.y = pts.y(measure)
         self.tree = tree if tree is not None else RegulusTree(regulus=self)
-
 
     def apply(self, f):
         for node in self.tree:
@@ -27,6 +27,7 @@ class Regulus(HasAttrs):
     def gc(self):
         for p in self.partitions():
             p.gc()
+
 
 class RegulusTree(Tree, HasAttrs):
     def __init__(self, regulus, root=None, auto=None):
@@ -66,9 +67,6 @@ class RegulusTree(Tree, HasAttrs):
         return attr.cache
 
 
-
-
-
 class Partition(object):
     def __init__(self, id_, persistence, pts_span=None, minmax_idx=None, max_merge=False, regulus=None):
         self.id = id_
@@ -84,7 +82,6 @@ class Partition(object):
 
     def __str__(self):
         return str(self.id)
-
 
     def size(self):
         return self.pts_span[1] - self.pts_span[0]

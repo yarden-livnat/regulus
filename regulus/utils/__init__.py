@@ -1,2 +1,2 @@
-# from .io import *
+from .io import *
 # from .cache import Cache

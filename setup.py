@@ -1,44 +1,41 @@
 #!/usr/bin/env python
-
-from setuptools import setup, find_packages
+import io
 import os
 
+from os.path import join as pjoin
+from setuptools import setup, find_packages
 
-def readme():
-    with open('README.md') as f:
-        return f.read()
+
+def get_version(file, name='__version__'):
+    """Get the version of the package from the given file by
+    executing it and extracting the given `name`.
+    """
+    path = os.path.realpath(file)
+    version_ns = {}
+    with io.open(path, encoding="utf8") as f:
+        exec(f.read(), {}, version_ns)
+    return version_ns[name]
+
+
+with open('README.md') as f:
+    README = f.read()
 
 
 with open('LICENSE') as f:
-    license = f.read()
+    LICENSE = f.read()
 
-
-def get_property(prop, project):
-    """
-        Helper function for retrieving properties from a project's
-        __init__.py file
-        @In, prop, string representing the property to be retrieved
-        @In, project, string representing the project from which we will
-        retrieve the property
-        @Out, string, the value of the found property
-    """
-    result = re.search(
-        r'{}\s*=\s*[\'"]([^\'"]*)[\'"]'.format(prop),
-        open(os.path.join(project, "__init__.py").read(),
-    )
-    return result.group(1)
-
-VERSION = get_property("__version__", "regulus")
+NAME = 'regulus'
+VERSION = get_version(pjoin(NAME, '_version.py'))
 
 setup(
-    name='regulus',
+    name=NAME,
     version=VERSION,
     description='Regulus',
-    long_description=readme(),
+    long_description=README,
     author='Yarden Livnat',
     author_email='yarden@sci.utah.edu',
     url='https://github.com/yarden_livnat/regulus',
-    license=license,
+    license=LICENSE,
     zip_safe=False,
     packages=find_packages(exclude=('tests', 'docs')),
     install_requires=[
@@ -48,6 +45,7 @@ setup(
     tests_require=['nose'],
     entry_points={
         'console_scripts': [
+            'regulus=regulus.command_line:main'
         ],
     }
 )

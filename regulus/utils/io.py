@@ -1,4 +1,5 @@
 import pickle
+
 from pathlib import Path
 from time import process_time
 
@@ -43,6 +44,7 @@ def add_defaults(regulus):
     regulus.tree.add_attr('size', node_size)
     regulus.tree.add_attr('rel_size', node_relative_size)
     regulus.tree.add_attr('span', node_span)
+
 
 def from_csv(filename, **kwargs):
     t_start = process_time()

@@ -1,5 +1,4 @@
 from collections import defaultdict
-from regulus.topo import Partition
 
 
 class Merge(object):
@@ -53,6 +52,7 @@ class Builder(object):
     def __init__(self, debug=False):
         self.base = None
         self.merges = []
+        self.maxima = set()
         self.min_map = defaultdict(set)
         self.max_map = defaultdict(set)
         self.active = set()
@@ -62,6 +62,8 @@ class Builder(object):
         self.debug = debug
         self.mapping = dict()
         self.unique = set()
+        self.hierarchy = None
+
         self.all = dict()
         self.data_pts = []
         self.single = 0
@@ -72,9 +74,7 @@ class Builder(object):
 
     def msc(self, base, hierarchy):
         self.base = base
-        for entry in hierarchy:
-            row = entry.split(',')
-            self.merges.append(Merge(float(row[1]), row[0] == 'Maxima', int(row[2]), int(row[3])))
+        self.hierarchy = hierarchy
         return self
 
     def build(self):
@@ -83,6 +83,11 @@ class Builder(object):
 
         # get root
         if len(self.active) != 1:
+            print(len(self.active), 'active')
+            for p in self.active:
+                print(f'{p.id}: {p.min_idx} {p.max_idx}  pts={p.base_pts}')
+                if len(p.children) > 0:
+                    print('\t', [c.id for c in p.children])
             raise RuntimeError('Error: found {} roots'.format(len(self.active)))
         self.root = self.active.pop()
 
@@ -105,11 +110,11 @@ class Builder(object):
             if record.src == record.dest:
                 continue
 
-            # merge.dest may have been merged already (same persistence level: degenerate case)
+            # degenerate case: merge.dest may have been merged already (same persistence level)
             dest = self.current(record.dest)
             src = self.current(record.src)
-
             if src == dest:
+                print("\t degenerated case:", src, dest)
                 continue
 
             record.dest = dest
@@ -123,13 +128,18 @@ class Builder(object):
 
     def prepare(self):
         PartitionNode.reset()
-        for key, value in self.base.items():
-            m, x = [int(s) for s in key.split(',')]
-            p = PartitionNode(0, list(value), m, x)
+        for key, pts in self.base.items():
+            p = PartitionNode(0, pts.tolist(), key[0], key[1])
+            self.maxima.add(key[1])
             self.add(p)
+        print('starting with ', len(self.active), 'partitions')
+
+        for key, record in self.hierarchy.items():
+            is_max = key in self.maxima
+            self.merges.append(Merge(record[0], is_max, key, record[1]))
 
         # self.find_unique()
-        self.remove_non_unique()
+        # self.remove_non_unique()
 
         self.merges.sort(key=lambda m: (m.level, m.src))
         high = self.merges[-1].level
@@ -181,13 +191,14 @@ class Builder(object):
         for r in remove_partitions | idx_map[merge.src]:
             self.remove(r)
 
+        # removed for topopy ver 1.0 because it assign each extrema to one base partition
         # assign the eliminated extrema as an extra internal point to the first new partition
-        if merge.src not in self.unique:
-            if len(add_partitions) > 0:
-                target = add_partitions[0]
-            else:
-                target = next(iter(idx_map[merge.dest]))
-            target.extrema.append(merge.src)
+        # if merge.src not in self.unique:
+        #     if len(add_partitions) > 0:
+        #         target = add_partitions[0]
+        #     else:
+        #         target = next(iter(idx_map[merge.dest]))
+        #     target.extrema.append(merge.src)
 
         for new_partition in add_partitions:
             self.add(new_partition)
@@ -234,7 +245,11 @@ class Builder(object):
         for p in self.active:
             for idx in [p.min_idx, p.max_idx]:
                 if idx not in self.unique:
-                    p.base_pts.remove(idx)
+                    if idx in p.base_pts:
+                        p.base_pts.remove(idx)
+                        print(f'{p.id}: removed non unique')
+                    else:
+                        print(f'{p.id}: min/max not found')
                 else:
                     print(idx, 'not removed because it is unique')
 
@@ -251,10 +266,10 @@ class Builder(object):
     def build_idx(self, partition, idx):
         first = idx
         if len(partition.children) == 0:
-            if partition.min_idx in partition.base_pts and partition.min_idx not in self.unique:
-                print('*** WARNING: min_idx {} in partition {}'.format(partition.min_idx, partition.id))
-            if partition.max_idx in partition.base_pts and partition.max_idx not in self.unique:
-                print('*** WARNING: max_idx {} in partition {}'.format(partition.max_idx, partition.id))
+            # if partition.min_idx in partition.base_pts and partition.min_idx not in self.unique:
+            #     print('*** WARNING: min_idx {} in partition {}'.format(partition.min_idx, partition.id))
+            # if partition.max_idx in partition.base_pts and partition.max_idx not in self.unique:
+            #     print('*** WARNING: max_idx {} in partition {}'.format(partition.max_idx, partition.id))
 
             n = len(partition.base_pts)
             if n > 0:
