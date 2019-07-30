@@ -3,10 +3,36 @@ from regulus.tree import Tree, Node
 from .hasattrs import HasAttrs
 
 
+class Regulus(HasAttrs):
+    def __init__(self, pts, pts_loc, measure, tree=None, type='smale', auto=[]):
+        super().__init__()
+        self.type = type
+        self.filename = None
+        self.pts = pts
+        self.pts_loc = pts_loc
+        self.measure = measure
+        self.y = pts.y(measure)
+        self.tree = tree if tree is not None else RegulusTree(regulus=self)
+
+    def apply(self, f):
+        for node in self.tree:
+            f(node.data, node=node)
+
+    def partitions(self):
+        return self.tree.items()
+
+    def nodes(self):
+        return iter(self.tree)
+
+    def gc(self):
+        for p in self.partitions():
+            p.gc()
+
+
 class RegulusTree(Tree, HasAttrs):
-    def __init__(self, regulus, root=None, auto=[]):
+    def __init__(self, regulus, root=None, auto=None):
         Tree.__init__(self, root)
-        HasAttrs.__init__(self, regulus.attr, auto)
+        HasAttrs.__init__(self, regulus.attr, auto or [])
         self.regulus = regulus
         self.root = root
 
@@ -37,33 +63,8 @@ class RegulusTree(Tree, HasAttrs):
     def retrieve(self, name):
         attr = self.attr[name]
         for node in self:
-            attr[node]
+            attr[node]  # ensure data is computed
         return attr.cache
-
-
-class Regulus(HasAttrs):
-    def __init__(self, pts, pts_loc, measure, tree=None, auto=[]):
-        super().__init__()
-        self.filename = None
-        self.pts = pts
-        self.pts_loc = pts_loc
-        self.measure = measure
-        self.y = pts.y(measure)
-        self.tree = tree if tree is not None else RegulusTree(regulus=self)
-
-    def apply(self, f):
-        for node in self.tree:
-            f(node.data, node=node)
-
-    def partitions(self):
-        return self.tree.items()
-
-    def nodes(self):
-        return iter(self.tree)
-
-    def gc(self):
-        for p in self.partitions():
-            p.gc()
 
 
 class Partition(object):
@@ -103,6 +104,12 @@ class Partition(object):
         if self._y is None:
             self._get_pts()
         return self._y
+
+    def max(self):
+        return self.regulus.y[self.minmax_idx[1]]
+
+    def min(self):
+        return self.regulus.y[self.minmax_idx[0]]
 
     def gc(self):
         self._x = None

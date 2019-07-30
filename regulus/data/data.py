@@ -10,7 +10,7 @@ class Data(object):
 
     @staticmethod
     def read_csv(filename, ndims=None):
-        return Data.from_pts(pd.read_csv(filename), ndims=ndims)
+        return Data.from_df(pd.read_csv(filename), ndims=ndims)
 
     @staticmethod
     def from_pts(pts, cols=None, ndims=None):
@@ -22,6 +22,14 @@ class Data(object):
         values = pts.loc[:, cols[ndims:]]
         return Data(x, values)
 
+    @staticmethod
+    def from_df(pts, ndims=None):
+        if ndims is None:
+            ndims = pts.shape[1] - 1
+        cols = list(pts.columns)
+        x = pts.loc[:, cols[:ndims]]
+        values = pts.loc[:, cols[ndims:]]
+        return Data(x, values)
 
     def normalize(self, scaler=None, copy=False):
         if scaler is None:
@@ -36,6 +44,8 @@ class Data(object):
     def original_x(self):
         return self.x if self.scaler is None else pd.DataFrame(self.scaler.inverse_transform(self.x, copy=True), columns=self.x.columns)
 
+    def inverse(self, x):
+        return x if self.scaler is None else pd.DataFrame(self.scaler.inverse_transform(x, copy=True), columns=x.columns)
 
     def y(self, measure):
         return self.values.loc[:, measure]

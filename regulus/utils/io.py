@@ -1,9 +1,10 @@
 import pickle
+
 from pathlib import Path
 from time import process_time
 
 from regulus.data.data import Data
-from regulus.topo import morse_smale, Regulus
+from regulus.topo import msc, Regulus
 from regulus.measures import *
 from regulus.models import *
 
@@ -32,20 +33,11 @@ def save(regulus, filename=None):
         pickle.dump(regulus, f)
 
 
-def from_csv(filename, **kwargs):
-    t_start = process_time()
-    path = Path(filename)
-    ndims = kwargs.pop('ndims', None)
-    pts = Data.read_csv(path.with_suffix('.csv'),ndims=ndims)
-    t_read = process_time()
-
-    pts.normalize()
-    regulus = morse_smale(pts, **kwargs)
-    t_msc = process_time()
-
+def add_defaults(regulus):
     regulus.add_attr('linear', linear_model)
     regulus.add_attr('fitness', fitness)
     regulus.add_attr('relative_fitness', relative_fitness)
+    regulus.add_attr('stepwise_fitness', stepwise_fitness)
 
     regulus.tree.add_attr('parent_fitness', parent_fitness)
     regulus.tree.add_attr('child_fitness', child_fitness)
@@ -53,7 +45,21 @@ def from_csv(filename, **kwargs):
     regulus.tree.add_attr('rel_size', node_relative_size)
     regulus.tree.add_attr('span', node_span)
 
-    save(regulus, filename=path.with_suffix('.regulus'))
+
+def from_csv(filename, **kwargs):
+    t_start = process_time()
+    path = Path(filename)
+    ndims = kwargs.pop('ndims', None)
+    pts = Data.read_csv(path.with_suffix('.csv'), ndims=ndims)
+    t_read = process_time()
+
+    pts.normalize()
+    regulus = msc(pts, **kwargs)
+    t_msc = process_time()
+
+    add_defaults(regulus)
+
+    # save(regulus, filename=path.with_suffix('.regulus'))
     t_end = process_time()
     print(f'time: {t_end - t_start:.3} read:{t_read-t_start:.3} msc:{t_msc-t_read:.3}  save:{t_end-t_msc:.3}')
     return regulus
