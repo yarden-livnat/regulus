@@ -1,12 +1,15 @@
 from regulus.utils.cache import Cache
 
+
 def _attr_key(obj):
     if isinstance(obj,tuple):
         return ':'.join(map(lambda o: str(o.id), obj))
     return obj.id
 
+
 def _dict(_):
     return dict()
+
 
 def _wrap_factory(context, func):
     def wrapper(a):

@@ -29,11 +29,13 @@ def compute_model(dataset, model, cache=None):
 def apply_model(model_name, model, regulus):
     regulus.attrs[model_name] = compute_model(model, regulus.tree)
 
+
 def apply_measure(measure, tree):
     local = tree.attrs
     context = tree.regulus.attrs
     for node in tree:
         measure(node, local, context)
+
 
 def compute_measure(func, tree):
     local = tree.attrs

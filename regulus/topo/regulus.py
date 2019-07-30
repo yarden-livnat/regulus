@@ -3,7 +3,6 @@ from regulus.tree import Tree, Node
 from .hasattrs import HasAttrs
 
 
-
 class RegulusTree(Tree, HasAttrs):
     def __init__(self, regulus, root=None, auto=[]):
         Tree.__init__(self, root)
@@ -52,7 +51,6 @@ class Regulus(HasAttrs):
         self.y = pts.y(measure)
         self.tree = tree if tree is not None else RegulusTree(regulus=self)
 
-
     def apply(self, f):
         for node in self.tree:
             f(node.data, node=node)
@@ -83,7 +81,6 @@ class Partition(object):
 
     def __str__(self):
         return str(self.id)
-
 
     def size(self):
         return self.pts_span[1] - self.pts_span[0]
