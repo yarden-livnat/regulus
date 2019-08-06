@@ -16,4 +16,4 @@ pts = Data.read_csv(ns.filename+'.csv', ndims=ns.dims, measure=ns.measure)
 pts.normalize()
 
 topo = morse_smale(pts, knn=ns.knn)
-save(topo, ns.filename+'.p')
+save(topo, ns.filename)

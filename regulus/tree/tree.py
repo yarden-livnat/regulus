@@ -1,5 +1,5 @@
 from uuid import UUID
-from .traverse import traverse
+from .traverse import traverse, depth_first
 
 
 class Node(object):
@@ -22,7 +22,6 @@ class Node(object):
     #         return str(self.data['id'])
     #     else:
     #         return "<none>"
-
 
     @property
     def children(self):
@@ -49,7 +48,6 @@ class Node(object):
         while parent:
             yield parent
             parent = parent.parent
-
 
 
 class Tree(object):
@@ -106,13 +104,12 @@ class Tree(object):
             root = _reduce(self.root, 0, 0)
         return self.clone(root)
 
-
     def prune(self, filter, factory=Node):
         def _prune(node, offset, depth):
             if not filter(self, node):
                 return None
             children = []
-            child_offeet = offset
+            child_offset = offset
             for child in node.children:
                 c = _prune(child, child_offset, depth+1)
                 if c is not None:
@@ -125,7 +122,6 @@ class Tree(object):
             root = _prune(self.root, 0, 0)
         return self.clone(root)
 
-
     def filter(self, f):
         select = set()
         for node in self:
@@ -133,20 +129,17 @@ class Tree(object):
                 select.add(node.id)
         return select
 
-
     def find(self, f):
         for node in self:
             if f(self, node):
                 return node
         return None
 
-
     def size(self):
         n = 0
         for node in self:
             n += 1
         return n
-
 
     def __iter__(self):
         if self._root is None:

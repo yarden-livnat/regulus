@@ -63,3 +63,14 @@ def from_csv(filename, **kwargs):
     t_end = process_time()
     print(f'time: {t_end - t_start:.3} read:{t_read-t_start:.3} msc:{t_msc-t_read:.3}  save:{t_end-t_msc:.3}')
     return regulus
+
+
+def from_df(pts, **kwargs):
+    t_start = process_time()
+    pts.normalize()
+    regulus = msc(pts, **kwargs)
+    add_defaults(regulus)
+
+    t_end = process_time()
+    print(f'time: {t_end - t_start:.3}')
+    return regulus
