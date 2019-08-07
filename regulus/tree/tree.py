@@ -101,7 +101,7 @@ class Tree(object):
 
         root = None
         if self.root is not None:
-            root = _reduce(self.root, 0, 0)
+            root = _reduce(self.root, 0)
         return self.clone(root)
 
     def prune(self, filter, factory=Node):
