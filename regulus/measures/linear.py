@@ -39,8 +39,8 @@ def stepwise_fitness(context, node):
     return fitnesses
 
 
-def relative_fitness(context, use_model, use_pts):
-    return context['linear'][use_model].score(use_pts.data.x, use_pts.data.y)
+def relative_fitness(context, has_mode, has_pts):
+    return context['linear'][has_mode].score(has_pts.data.x, has_pts.data.y)
 
 
 def parent_fitness(context, node):

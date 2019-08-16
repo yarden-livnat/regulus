@@ -63,8 +63,13 @@ class RegulusTree(Tree, HasAttrs):
     def retrieve(self, name):
         attr = self.attr[name]
         for node in self:
-            attr[node]  # ensure data is computed
+            attr.compute(node)  # ensure data is computed
         return attr.cache
+
+    def iter_attr(self, attr):
+        values = self.attr[attr]
+        for node in self:
+            yield values[node]
 
 
 class Partition(object):

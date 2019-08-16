@@ -20,13 +20,19 @@ def _wrap_factory(context, func):
 
 
 class HasAttrs(object):
-    def __init__(self, parent=None, auto=[]):
+    def __init__(self, parent=None, auto=()):
         self.attr = Cache(parent, factory=_dict)
         self.auto = []
         for entry in auto:
             self.add_attr(*entry)
 
-    def add_attr(self, name, factory, key=_attr_key, **kwargs):
+    def add_attr(self, factory, name=None, key=_attr_key, **kwargs):
+        if name is None:
+            if factory.__name__ == '<lambda>':
+                print('Error: a name must be given for a lambda expression')
+                return
+            name = factory.__name__
+
         self.attr[name] = Cache(key=key, factory=_wrap_factory(self.attr, factory), **kwargs)
         for i, entry in enumerate(self.auto):
             if entry[0] == name:

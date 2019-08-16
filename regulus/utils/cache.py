@@ -33,9 +33,11 @@ class Cache(object):
             return self.parent.get(key)
         return [None, False]
 
+    def compute(self, obj):
+        self.__getitem__(obj)
+
     def __iter__(self):
         return iter(self.cache)
-
 
     def __contains__(self, obj):
         key = self.key(obj)

@@ -34,16 +34,16 @@ def save(regulus, filename=None):
 
 
 def add_defaults(regulus):
-    regulus.add_attr('linear', linear_model)
-    regulus.add_attr('fitness', fitness)
-    regulus.add_attr('relative_fitness', relative_fitness)
-    regulus.add_attr('stepwise_fitness', stepwise_fitness)
+    regulus.add_attr(linear_model, name='linear')
+    regulus.add_attr(fitness)
+    regulus.add_attr(relative_fitness)
+    regulus.add_attr(stepwise_fitness)
 
-    regulus.tree.add_attr('parent_fitness', parent_fitness)
-    regulus.tree.add_attr('child_fitness', child_fitness)
-    regulus.tree.add_attr('size', node_size)
-    regulus.tree.add_attr('rel_size', node_relative_size)
-    regulus.tree.add_attr('span', node_span)
+    regulus.tree.add_attr(parent_fitness)
+    regulus.tree.add_attr(child_fitness)
+    regulus.tree.add_attr(node_size, name='size')
+    regulus.tree.add_attr(node_relative_size, name='rel_size')
+    regulus.tree.add_attr(node_span, name='span')
 
 
 def from_csv(filename, **kwargs):
