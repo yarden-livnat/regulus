@@ -81,9 +81,11 @@ class Partition(object):
         self.pts_span = pts_span if pts_span is not None else [0, 0]
         self.minmax_idx = minmax_idx if minmax_idx is not None else []
         self.max_merge = max_merge
+        self._idx = None
 
         self._x = None
         self._y = None
+        self._values = None
 
     def __str__(self):
         return str(self.id)
@@ -95,8 +97,10 @@ class Partition(object):
         loc = self.regulus.pts_loc
         idx = [loc[i] for i in range(self.pts_span[0], self.pts_span[1]-1)]
         idx.extend(self.minmax_idx)
+        self._idx = idx
         self._x = self.regulus.pts.x.loc[idx]
         self._y = self.regulus.y[idx]
+        # self._values =
 
     @property
     def x(self):
@@ -109,6 +113,14 @@ class Partition(object):
         if self._y is None:
             self._get_pts()
         return self._y
+
+    @property
+    def values(self):
+        if self._values is None:
+            if self._idx is None:
+                self._get_pts()
+            self._values = self.regulus.pts.values.loc[self._idx]
+        return self._values
 
     def max(self):
         return self.regulus.y[self.minmax_idx[1]]
