@@ -38,6 +38,8 @@ def add_defaults(regulus):
     regulus.add_attr(fitness)
     regulus.add_attr(relative_fitness)
     regulus.add_attr(stepwise_fitness)
+    regulus.add_attr(node_min, name='min')
+    regulus.add_attr(node_max, name='max')
 
     regulus.tree.add_attr(parent_fitness)
     regulus.tree.add_attr(child_fitness)
