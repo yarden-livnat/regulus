@@ -1,26 +1,6 @@
 import numpy as np
 from sklearn import linear_model as lm
 
-# def cache_key(*args):
-#     if len(args) == 1:
-#         return args[0].id
-#     return f'{args[0].id}:{args[1].id}'
-#
-#
-# def cached(name, key=cache_key):
-#     def named(factory):
-#         def wrapper(*args):
-#             cache = args[-1][name]
-#             k = key(*args)
-#             if k not in cache:
-#                 print('cache miss for ', name)
-#                 cache[k] = factory(*args)
-#             return cache[k]
-#         return wrapper
-#     return named
-
-
-# @cached('fitness')
 def fitness(context, node):
     return context['linear'][node].score(node.data.x, node.data.y)
 

@@ -1,4 +1,4 @@
-from regulus.utils.cache import Cache
+from regulus.topo.cache import Cache
 
 
 def _attr_key(obj):

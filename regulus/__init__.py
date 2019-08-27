@@ -2,5 +2,5 @@
 # from .measures import *
 # from .models import *
 # from .topo import *
-# from .tree import *
+from .topo import Regulus, RegulusTree
 from .utils import *

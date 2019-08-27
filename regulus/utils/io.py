@@ -7,6 +7,7 @@ from regulus.data.data import Data
 from regulus.topo import msc, Regulus
 from regulus.measures import *
 from regulus.models import *
+from regulus.alg import AttrRange
 
 
 def load(filename):
@@ -35,17 +36,17 @@ def save(regulus, filename=None):
 
 def add_defaults(regulus):
     regulus.add_attr(linear_model, name='linear')
-    regulus.add_attr(fitness)
-    regulus.add_attr(relative_fitness)
+    regulus.add_attr(fitness, range=AttrRange('fixed', [0,1]))
+    regulus.add_attr(relative_fitness, range=AttrRange('fixed', [0,1]))
     regulus.add_attr(stepwise_fitness)
-    regulus.add_attr(node_min, name='min')
-    regulus.add_attr(node_max, name='max')
+    regulus.add_attr(node_min, name='min', range=AttrRange('auto'))
+    regulus.add_attr(node_max, name='max', range=AttrRange('auto'))
 
-    regulus.tree.add_attr(parent_fitness)
-    regulus.tree.add_attr(child_fitness)
-    regulus.tree.add_attr(node_size, name='size')
-    regulus.tree.add_attr(node_relative_size, name='rel_size')
-    regulus.tree.add_attr(node_span, name='span')
+    regulus.tree.add_attr(parent_fitness, range=AttrRange('fixed', [0,1]))
+    regulus.tree.add_attr(child_fitness, range=AttrRange('fixed', [0,1]))
+    regulus.tree.add_attr(node_size, name='size', range=AttrRange('auto'))
+    regulus.tree.add_attr(node_relative_size, name='rel_size', range=AttrRange('fixed', [0,1]))
+    regulus.tree.add_attr(node_span, name='span', range=AttrRange('fixed', [0,1]))
 
 
 def from_csv(filename, **kwargs):
