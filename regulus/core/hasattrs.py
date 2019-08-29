@@ -1,4 +1,4 @@
-from regulus.topo.cache import Cache
+from regulus.core.cache import Cache
 
 
 def minmax(obj):
@@ -48,7 +48,11 @@ def _wrap_factory(context, func):
 
 class HasAttrs(object):
     def __init__(self, parent=None, auto=()):
-        self.attr = Cache(parent, factory=_dict)
+        range = None
+        if parent is not None:
+            range=parent.properties.get('range', None)
+
+        self.attr = Cache(parent, factory=_dict, range=range)
         self.auto = []
         for entry in auto:
             self.add_attr(*entry)
@@ -65,11 +69,11 @@ class HasAttrs(object):
 
         self.attr[name] = Cache(key=key, factory=_wrap_factory(self.attr, factory), range=range, **kwargs)
         for i, entry in enumerate(self.auto):
-            if entry[0] == name:
-                self.auto[i] = [name, factory, key]
+            if entry[1] == name:
+                self.auto[i] = [factory, name, key, range]
                 break
         else:
-            self.auto.append([name, factory, key])
+            self.auto.append([factory, name, key, range])
 
     def __contains__(self, attr):
         """check is attr in cache"""
@@ -77,7 +81,7 @@ class HasAttrs(object):
 
     def __setstate__(self, state):
         self.__dict__.update(state)
-        for name, factory, key in self.auto:
+        for factory, name, key, range in self.auto:
             self.attr[name].factory = _wrap_factory(self.attr, factory)
 
 

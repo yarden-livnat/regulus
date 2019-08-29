@@ -7,7 +7,7 @@ from regulus.data.data import Data
 from regulus.topo import msc, Regulus
 from regulus.measures import *
 from regulus.models import *
-from regulus.topo import AttrRange, UNIT_RANGE
+from regulus.core import AttrRange, UNIT_RANGE
 
 
 def load(filename):
