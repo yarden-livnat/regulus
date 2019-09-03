@@ -26,13 +26,19 @@ class Partition(object):
         return self.pts_span[1] - self.pts_span[0]
 
     def _get_pts(self):
-        loc = self.regulus.pts_loc
-        idx = [loc[i] for i in range(self.pts_span[0], self.pts_span[1]-1)]
-        idx.extend(self.minmax_idx)
-        self._idx = idx
+        idx = self.idx
         self._x = self.regulus.pts.x.loc[idx]
         self._y = self.regulus.y[idx]
         # self._values =
+
+    @property
+    def idx(self):
+        if self._idx is None:
+            loc = self.regulus.pts_loc
+            idx = [loc[i] for i in range(self.pts_span[0], self.pts_span[1] - 1)]
+            idx.extend(self.minmax_idx)
+            self._idx = idx
+        return self._idx
 
     @property
     def x(self):
@@ -102,7 +108,6 @@ class RegulusTree(Tree, HasAttrs):
             attr.compute(node)  # ensure data is computed
         return attr.cache
 
-
     def iter_attr(self, attr):
         values = self.attr[attr]
         for node in self:
@@ -120,18 +125,21 @@ class Regulus(HasAttrs, HasTree):
         self.y = pts.y(measure)
         self.tree = tree if tree is not None else RegulusTree(regulus=self)
 
-    # @HasTree.tree.setter
-    # def tree(self, tree):
-    #     if tree is not None and not isinstance(tree, RegulusTree):
-    #         raise ValueError('Tree must be a RegulusTree')
-    #     super().tree = tree
-
     def apply(self, f):
         for node in self.tree:
             f(node.data, node=node)
 
     def partitions(self):
         return self.tree.items()
+
+    def partition(self, id):
+        for p in self.partitions():
+            if p.id == id:
+                return p
+        return None
+
+    def get_partitions(self, l):
+        return list(filter(lambda p: p.id in l, self.partitions()))
 
     def nodes(self):
         return iter(self.tree)
