@@ -50,8 +50,13 @@ def add_defaults(regulus):
 
 
 def from_csv(filename, **kwargs):
-    t_start = process_time()
     path = Path(filename)
+    if not path.exists():
+        if path.suffix == '':
+            if not path.with_suffix('.csv').exists():
+                raise FileNotFoundError(f"File '{filename}[.csv]' does not exist")
+
+    t_start = process_time()
     ndims = kwargs.pop('ndims', None)
     pts = Data.read_csv(path.with_suffix('.csv'), ndims=ndims)
     t_read = process_time()
