@@ -113,6 +113,29 @@ class RegulusTree(Tree, HasAttrs):
         for node in self:
             yield values[node]
 
+    def partitions(self):
+        return self.items()
+
+    def partition(self, id):
+        for p in self.partitions():
+            if p.id == id:
+                return p
+        return None
+
+    def partitions_with_parent(self):
+        for node in iter(self):
+            yield node.data, node.parent.data
+
+    def at_persistence(self, level):
+        partitions = set()
+        for p, parent in self.partitions_with_parent():
+            if p.persistence <= level < parent.persistence:
+                partitions.add(p)
+        return partitions
+
+    def find_partitions(self, l):
+        return list(filter(lambda p: p.id in l, self.partitions()))
+
 
 class Regulus(HasAttrs, HasTree):
     def __init__(self, pts, pts_loc, measure, tree=None, type='smale'):
@@ -130,21 +153,15 @@ class Regulus(HasAttrs, HasTree):
             f(node.data, node=node)
 
     def partitions(self):
-        return self.tree.items()
+        return self.tree.partitions()
 
     def partition(self, id):
-        for p in self.partitions():
-            if p.id == id:
-                return p
-        return None
-
-    def get_partitions(self, l):
-        return list(filter(lambda p: p.id in l, self.partitions()))
+        return self.tree.partition(id)
 
     def nodes(self):
         return iter(self.tree)
 
     def gc(self):
-        for p in self.partitions():
+        for p in self.tree.partitions():
             p.gc()
 
