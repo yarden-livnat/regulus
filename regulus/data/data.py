@@ -1,4 +1,5 @@
 import pandas as pd
+from pathlib import Path
 from sklearn.preprocessing import StandardScaler
 
 
@@ -10,6 +11,7 @@ class Data(object):
 
     @staticmethod
     def read_csv(filename, ndims=None):
+
         return Data.from_df(pd.read_csv(filename), ndims=ndims)
 
     @staticmethod
