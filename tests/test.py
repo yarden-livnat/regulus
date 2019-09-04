@@ -12,8 +12,8 @@ p.add_argument('-k', '--knn', default=8, type=int, help='knn')
 
 ns = p.parse_args()
 
-pts = Data.read_csv(ns.filename+'.csv', ndims=ns.dims, measure=ns.measure)
+pts = Data.read_csv(ns.filename+'.csv', ndims=ns.dims)
 pts.normalize()
 
-topo = morse_smale(pts, knn=ns.knn)
+topo = morse_smale(pts, knn=ns.knn, measure=ns.measure)
 save(topo, ns.filename)
