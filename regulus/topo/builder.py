@@ -114,7 +114,7 @@ class Builder(object):
             dest = self.current(record.dest)
             src = self.current(record.src)
             if src == dest:
-                print("\t degenerated case:", src, dest)
+                # print("\t degenerated case:", src, dest)
                 continue
 
             record.dest = dest
@@ -129,7 +129,7 @@ class Builder(object):
     def prepare(self):
         PartitionNode.reset()
         for key, pts in self.base.items():
-            p = PartitionNode(0, pts.tolist(), key[0], key[1])
+            p = PartitionNode(persistence=0, base_pts=pts.tolist(), min_idx=key[0], max_idx=key[1])
             self.maxima.add(key[1])
             self.add(p)
         print('starting with ', len(self.active), 'partitions')
