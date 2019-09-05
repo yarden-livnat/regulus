@@ -1,10 +1,8 @@
 from types import SimpleNamespace
-import pandas as pd
 from topopy.MorseSmaleComplex import MorseSmaleComplex
-from topopy.TopologicalObject import TopologicalObject
 
 from regulus.topo.builder import Builder
-from regulus.topo import Regulus, Partition, RegulusTree
+from regulus.topo import Regulus, Partition
 from regulus.tree import Node
 
 defaults = SimpleNamespace(
@@ -65,7 +63,7 @@ def msc(data, kind='smale', measure=None, knn=defaults.knn, beta=defaults.beta, 
 
 
 def _visit(p, parent, regulus, offset):
-    partition = Partition(p.id, p.persistence, p.span, [p.min_idx, p.max_idx], p.max_merge, regulus)
+    partition = Partition(p.id, p.persistence, p.span, [p.min_idx, p.max_idx], p.extrema, p.max_merge, regulus)
     node = Node(ref=partition.id, data=partition, parent=parent, offset=offset)
     for child in p.children:
         _visit(child, node, regulus, offset)

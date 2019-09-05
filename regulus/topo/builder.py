@@ -28,24 +28,26 @@ class PartitionNode(object):
         self.parent = None
         self.children = []
 
-        self.extrema = []
+        self.extrema = set()
         self.base_pts = base_pts if base_pts is not None else []
         self.min_idx = min_idx
         self.max_idx = max_idx
         self.max_merge = is_max
 
         if from_partition is not None:
-            self.min_idx = from_partition.min_idx
-            self.max_idx = from_partition.max_idx
-            self.children.append(from_partition)
-            from_partition.parent = self
+            self.add_child(from_partition, pts=None)
+        else:
+            self.extrema.add(self.min_idx)
+            self.extrema.add(self.max_idx)
 
-    def add_child(self, child):
+    def add_child(self, child, pts):
         child.parent = self
         self.children.append(child)
-        # if child.min_idx != self.min_idx and child.max_idx != self.max_idx:
-        #     print("ERROR: child {} [{} {}] merged into parent {} [{} {}] without a matching extrema".format(child.id,
-        #                                             child.min_idx, child.max_idx, self.id, self.min_idx, self.max_idx))
+        self.extrema |= child.extrema
+        if pts is None or pts[child.min_idx] < pts[self.min_idx]:
+            self.min_idx = child.min_idx
+        if pts is None or pts[child.max_idx] > pts[self.max_idx]:
+            self.max_idx = child.max_idx
 
 
 class Builder(object):
@@ -80,16 +82,7 @@ class Builder(object):
     def build(self):
         self.prepare()
         self.merge()
-
-        # get root
-        if len(self.active) != 1:
-            print(len(self.active), 'active')
-            for p in self.active:
-                print(f'{p.id}: {p.min_idx} {p.max_idx}  pts={p.base_pts}')
-                if len(p.children) > 0:
-                    print('\t', [c.id for c in p.children])
-            raise RuntimeError('Error: found {} roots'.format(len(self.active)))
-        self.root = self.active.pop()
+        self.create_root()
 
         self.single = 0
         idx = self.build_idx(self.root, 0)
@@ -97,34 +90,10 @@ class Builder(object):
         print('len(idx)=', idx)
 
         self.test_uniques()
-
-        self.pts.extend([self.root.min_idx, self.root.max_idx])
         self.rename(self.root, 0)
         return self
 
     # internal
-
-    def merge(self):
-        for record in self.merges:
-            # print(record.level, record.is_max, record.src, record.dest)
-            if record.src == record.dest:
-                continue
-
-            # degenerate case: merge.dest may have been merged already (same persistence level)
-            dest = self.current(record.dest)
-            src = self.current(record.src)
-            if src == dest:
-                # print("\t degenerated case:", src, dest)
-                continue
-
-            record.dest = dest
-            record.src = src
-            self.mapping[record.src] = record.dest
-
-            if record.is_max:
-                self.collapse(record, self.max_map, lambda item: item.min_idx)
-            else:
-                self.collapse(record, self.min_map, lambda item: item.max_idx)
 
     def prepare(self):
         PartitionNode.reset()
@@ -150,6 +119,27 @@ class Builder(object):
             for partition in self.active:
                 self.check_partition(partition)
 
+    def merge(self):
+        for record in self.merges:
+            # print(record.level, record.is_max, record.src, record.dest)
+            if record.src == record.dest:
+                continue
+
+            # degenerate case: merge.dest may have been merged already (same persistence level)
+            dest = self.current(record.dest)
+            src = self.current(record.src)
+            if src == dest:
+                continue
+
+            record.dest = dest
+            record.src = src
+            self.mapping[record.src] = record.dest
+
+            if record.is_max:
+                self.collapse(record, self.max_map, lambda item: item.min_idx)
+            else:
+                self.collapse(record, self.min_map, lambda item: item.max_idx)
+
     def collapse(self, merge, idx_map, idx):
         add_partitions = []
         remove_partitions = set()
@@ -164,17 +154,14 @@ class Builder(object):
                             new_partition = PartitionNode(merge.level, from_partition=d, is_max=merge.is_max)
                             remove_partitions.add(d)  # can't be removed during the iterations
                             add_partitions.append(new_partition)
-                        new_partition.add_child(s)
+                        new_partition.add_child(s, self.data_pts)
                     else:
-                        # s is an intermediate and should be absorbed
-                        if len(s.children) == 0:
-                            # s is a base partition
-                            d.base_pts.extend(s.base_pts)
-                        else:
+                        # s is an intermediate and should be eliminated (absorbed)
+                        if len(s.children) > 0:
                             for child in s.children:
-                                d.add_child(child)
-                        if len(s.extrema) > 0:
-                            d.extrema.extend(s.extrema)
+                                d.add_child(child, self.data_pts)
+                        else:
+                            d.base_pts.extend(s.base_pts)
                     remove_src.add(s)  # can't be removed during the iterations
             for s in remove_src:
                 self.remove(s)
@@ -186,22 +173,24 @@ class Builder(object):
                 new_partition.max_idx = merge.dest
             else:
                 new_partition.min_idx = merge.dest
+            new_partition.extrema.add(merge.dest)
             add_partitions.append(new_partition)
 
         for r in remove_partitions | idx_map[merge.src]:
             self.remove(r)
 
-        # removed for topopy ver 1.0 because it assign each extrema to one base partition
-        # assign the eliminated extrema as an extra internal point to the first new partition
-        # if merge.src not in self.unique:
-        #     if len(add_partitions) > 0:
-        #         target = add_partitions[0]
-        #     else:
-        #         target = next(iter(idx_map[merge.dest]))
-        #     target.extrema.append(merge.src)
+        for partition in add_partitions:
+            self.add(partition)
 
-        for new_partition in add_partitions:
-            self.add(new_partition)
+    def create_root(self):
+        if len(self.active) != 1:
+            print(len(self.active), 'active')
+            for p in self.active:
+                print(f'{p.id}: {p.min_idx} {p.max_idx}  pts={p.base_pts}')
+                if len(p.children) > 0:
+                    print('\t', [c.id for c in p.children])
+            raise RuntimeError('Error: found {} roots'.format(len(self.active)))
+        self.root = self.active.pop()
 
     # consistency checks
 
@@ -266,11 +255,6 @@ class Builder(object):
     def build_idx(self, partition, idx):
         first = idx
         if len(partition.children) == 0:
-            # if partition.min_idx in partition.base_pts and partition.min_idx not in self.unique:
-            #     print('*** WARNING: min_idx {} in partition {}'.format(partition.min_idx, partition.id))
-            # if partition.max_idx in partition.base_pts and partition.max_idx not in self.unique:
-            #     print('*** WARNING: max_idx {} in partition {}'.format(partition.max_idx, partition.id))
-
             n = len(partition.base_pts)
             if n > 0:
                 self.pts.extend(partition.base_pts)
@@ -278,15 +262,12 @@ class Builder(object):
         else:
             if len(partition.children) == 1:
                 self.single += 1
-
-            if len(partition.extrema) > 0:
-                self.pts.extend(partition.extrema)
-                idx += len(partition.extrema)
-
             for child in partition.children:
                 idx = self.build_idx(child, idx)
 
         partition.span = (first, idx)
+        extrema = set(filter(lambda p: p not in self.pts[first:idx], partition.extrema))
+        partition.extrema = extrema
         return idx
 
     def test_uniques(self):

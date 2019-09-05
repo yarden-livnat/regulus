@@ -5,13 +5,14 @@ from regulus.core import HasAttrs, HasTree
 
 
 class Partition(object):
-    def __init__(self, id_, persistence, pts_span=None, minmax_idx=None, max_merge=False, regulus=None):
+    def __init__(self, id_, persistence, pts_span=None, minmax_idx=None, extrema=(), max_merge=False, regulus=None):
         self.id = id_
         self.regulus = regulus
         self.persistence = persistence
 
         self.pts_span = pts_span if pts_span is not None else [0, 0]
         self.minmax_idx = minmax_idx if minmax_idx is not None else []
+        self.extrema = list(extrema)
         self.max_merge = max_merge
         self._idx = None
 
@@ -20,23 +21,26 @@ class Partition(object):
         self._values = None
 
     def __str__(self):
-        return str(self.id)
-
-    def size(self):
-        return self.pts_span[1] - self.pts_span[0]
+        return f'Partition<{self.id}: persistence:{self.persistence} span:{self.pts_span} extrema:{self.extrema}'
 
     def _get_pts(self):
         idx = self.idx
         self._x = self.regulus.pts.x.loc[idx]
         self._y = self.regulus.y[idx]
-        # self._values =
+
+    def internal_size(self):
+        return self.pts_span[1] - self.pts_span[0]
+
+    def size(self):
+        return self.pts_span[1] - self.pts_span[0] + len(self.extrema)
 
     @property
     def idx(self):
         if self._idx is None:
             loc = self.regulus.pts_loc
-            idx = [loc[i] for i in range(self.pts_span[0], self.pts_span[1] - 1)]
-            idx.extend(self.minmax_idx)
+            idx = loc[self.pts_span[0]:self.pts_span[1] - 1]
+            # idx = [loc[i] for i in range(self.pts_span[0], self.pts_span[1] - 1)]
+            idx.extend(self.extrema)
             self._idx = idx
         return self._idx
 
