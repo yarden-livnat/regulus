@@ -3,11 +3,11 @@ import pickle
 from pathlib import Path
 from time import process_time
 
-from regulus.data.data import Data
+from regulus.core.data import Data
 from regulus.topo import msc, Regulus
 from regulus.measures import *
 from regulus.models import *
-from regulus.core import AttrRange, UNIT_RANGE
+from regulus.core import UNIT_RANGE
 
 
 def load(filename):
