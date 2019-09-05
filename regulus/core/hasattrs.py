@@ -1,4 +1,4 @@
-from regulus.core.cache import Cache
+from .cache import Cache
 
 
 def minmax(obj):
