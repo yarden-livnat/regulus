@@ -17,11 +17,8 @@ class Node(object):
         if parent:
             parent.add_child(self)
 
-    # def __str__(self):
-    #     if 'id' in self.data:
-    #         return str(self.data['id'])
-    #     else:
-    #         return "<none>"
+    def __str__(self):
+        f'<Node {self.id} data:{str(self.data)} children:{[n.id for n in self._children]}'
 
     @property
     def children(self):
@@ -48,6 +45,11 @@ class Node(object):
         while parent:
             yield parent
             parent = parent.parent
+
+    def depth(self, d):
+        if self.children is None:
+            return d
+        return max(c.depth(d+1) for c in self.children)
 
 
 class Tree(object):
@@ -140,6 +142,12 @@ class Tree(object):
         for node in self:
             n += 1
         return n
+
+    def find_id(self, id):
+        for node in self:
+            if node.id == id:
+                return node
+        return None
 
     def __iter__(self):
         if self._root is None:
