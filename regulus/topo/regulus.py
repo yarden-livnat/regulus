@@ -32,7 +32,7 @@ class Partition(object):
         return self.pts_span[1] - self.pts_span[0]
 
     def size(self):
-        return self.pts_span[1] - self.pts_span[0] + len(self.extrema)
+        return len(self.idx)
 
     @property
     def idx(self):
