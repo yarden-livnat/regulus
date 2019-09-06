@@ -1,7 +1,7 @@
 from traitlets import Bool, HasTraits, Instance, Set, This
 
-from regulus.tree import Tree, Node
-from regulus.core import HasAttrs, HasTree
+from regulus.tree import HasTree, Node, Tree
+from regulus.core import HasAttrs
 
 
 class Partition(object):
