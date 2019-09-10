@@ -11,7 +11,7 @@ defaults = SimpleNamespace(
         norm=None,
         graph='relaxed beta skeleton',
         gradient='steepest',
-        aggregator='mean',
+        aggregator=None,
         connect=False
 )
 
@@ -63,7 +63,14 @@ def msc(data, kind='smale', measure=None, knn=defaults.knn, beta=defaults.beta, 
 
 
 def _visit(p, parent, regulus, offset):
-    partition = Partition(p.id, p.persistence, p.span, [p.min_idx, p.max_idx], p.extrema, p.max_merge, regulus)
+    partition = Partition(p.id,
+                          p.persistence,
+                          pts_span=p.span,
+                          minmax_idx=[p.min_idx, p.max_idx],
+                          extrema=p.extrema,
+                          max_merge=p.max_merge,
+                          base=p.base,
+                          regulus=regulus)
     node = Node(ref=partition.id, data=partition, parent=parent, offset=offset)
     for child in p.children:
         _visit(child, node, regulus, offset)

@@ -27,6 +27,8 @@ class PartitionNode(object):
         self.span = []
         self.parent = None
         self.children = []
+        self.orig = from_partition
+        self.base = self.id
 
         self.extrema = set()
         self.base_pts = base_pts if base_pts is not None else []
@@ -36,6 +38,7 @@ class PartitionNode(object):
 
         if from_partition is not None:
             self.add_child(from_partition, pts=None)
+            self.base = from_partition.base
         else:
             self.extrema.add(self.min_idx)
             self.extrema.add(self.max_idx)
@@ -46,8 +49,24 @@ class PartitionNode(object):
         self.extrema |= child.extrema
         if pts is None or pts[child.min_idx] < pts[self.min_idx]:
             self.min_idx = child.min_idx
+            self.orig = child
+            self.base = child.base
         if pts is None or pts[child.max_idx] > pts[self.max_idx]:
             self.max_idx = child.max_idx
+            self.orig = child
+            self.base = child.base
+
+    def merge(self, other, pts):
+        self.base_pts.extend(other.base_pts)
+        self.extrema |= other.extrema
+        if pts is None or pts[other.min_idx] < pts[self.min_idx]:
+            self.min_idx = other.min_idx
+            self.orig = other
+            self.base = other.base
+        if pts is None or pts[other.max_idx] > pts[self.max_idx]:
+            self.max_idx = other.max_idx
+            self.orig = other
+            self.base = other.base
 
 
 class Builder(object):
@@ -81,43 +100,54 @@ class Builder(object):
 
     def build(self):
         self.prepare()
+        self.count_pts()
         self.merge()
         self.create_root()
+        print('simplification:')
+        print(f'\tbefore: partitions:{self.total(self.root)}  depth={self.depth(self.root, 0)}')
+        self.simplify(self.root)
+        print(f'\tafter:  partitions={self.total(self.root)}  depth={self.depth(self.root, 0)}')
 
         self.single = 0
         idx = self.build_idx(self.root, 0)
-        print('found {} singles'.format(self.single))
-        print('len(idx)=', idx)
 
-        self.test_uniques()
         self.rename(self.root, 0)
+        if self.single > 0:
+            print('found {} singles'.format(self.single))
+        if len(self.pts) != len(self.data_pts):
+            print(f'*** error: data has {len(self.data_pts)} but only {len(self.pts)} are accounted for')
         return self
 
     # internal
+
+    def total(self, p):
+        n = 1
+        for child in p.children:
+            n += self.total(child)
+        return n
+
+    def depth(self, p, d):
+        pd = d+1
+        for child in p.children:
+            pd = max(pd, self.depth(child, d+1))
+        return pd
 
     def prepare(self):
         PartitionNode.reset()
         for key, pts in self.base.items():
             p = PartitionNode(persistence=0, base_pts=pts.tolist(), min_idx=key[0], max_idx=key[1])
             self.maxima.add(key[1])
-            self.add(p)
-        print('starting with ', len(self.active), 'partitions')
+            self.add_active(p)
+        print(f'Base: {len(self.active)} partitions {len(self.data_pts)} points')
 
         for key, record in self.hierarchy.items():
             is_max = key in self.maxima
             self.merges.append(Merge(record[0], is_max, key, record[1]))
 
-        # self.find_unique()
-        # self.remove_non_unique()
-
         self.merges.sort(key=lambda m: (m.level, m.src))
         high = self.merges[-1].level
         for merge in self.merges:
             merge.level /= high
-
-        if self.debug:
-            for partition in self.active:
-                self.check_partition(partition)
 
     def merge(self):
         for record in self.merges:
@@ -125,7 +155,7 @@ class Builder(object):
             if record.src == record.dest:
                 continue
 
-            # degenerate case: merge.dest may have been merged already (same persistence level)
+            # check for a degenerate case: merge.dest may have been merged already (same persistence level)
             dest = self.current(record.dest)
             src = self.current(record.src)
             if src == dest:
@@ -149,61 +179,72 @@ class Builder(object):
             remove_src = set()
             for s in idx_map[merge.src]:
                 if idx(s) == idx(d):
-                    if s.persistence != merge.level:
-                        if new_partition is None:
-                            new_partition = PartitionNode(merge.level, from_partition=d, is_max=merge.is_max)
-                            remove_partitions.add(d)  # can't be removed during the iterations
-                            add_partitions.append(new_partition)
-                        new_partition.add_child(s, self.data_pts)
-                    else:
-                        # s is an intermediate and should be eliminated (absorbed)
-                        if len(s.children) > 0:
-                            for child in s.children:
-                                d.add_child(child, self.data_pts)
-                        else:
-                            d.base_pts.extend(s.base_pts)
-                    remove_src.add(s)  # can't be removed during the iterations
+                    if new_partition is None:
+                        new_partition = PartitionNode(merge.level, from_partition=d, is_max=merge.is_max)
+                        remove_partitions.add(d)  # can't be removed during the loop
+                        add_partitions.append(new_partition)
+                    new_partition.add_child(s, self.data_pts)
+                    remove_src.add(s)
             for s in remove_src:
-                self.remove(s)
+                self.remove_active(s)
 
         for s in idx_map[merge.src]:
-            # create a new partition with a single child because the max value has changed
-            new_partition = PartitionNode(merge.level, from_partition=s)
-            if merge.is_max:
-                new_partition.max_idx = merge.dest
+            if s.persistence != merge.level:
+                # create a new partition with a single child because the extrema value has changed
+                new_partition = PartitionNode(merge.level, from_partition=s)
+                if merge.is_max:
+                    new_partition.max_idx = merge.dest
+                else:
+                    new_partition.min_idx = merge.dest
+                new_partition.extrema.add(merge.dest)
+                add_partitions.append(new_partition)
+                remove_partitions.add(s)
             else:
-                new_partition.min_idx = merge.dest
-            new_partition.extrema.add(merge.dest)
-            add_partitions.append(new_partition)
+                if merge.is_max:
+                    s.max_idx = merge.dest
+                else:
+                    s.min_idx = merge.dest
+                s.extrema.add(merge.dest)
+                self.remove_active(s)
+                self.add_active(s)
 
-        for r in remove_partitions | idx_map[merge.src]:
-            self.remove(r)
+        for r in remove_partitions:
+            self.remove_active(r)
 
         for partition in add_partitions:
-            self.add(partition)
+            self.add_active(partition)
+
+    def simplify(self, p):
+        children = []
+        for child in p.children:
+            self.simplify(child)
+            if child.persistence == p.persistence:
+                if len(child.children) > 0:
+                    # print(f'simplify : child id={child.id} p={child.persistence} pts={len(child.base_pts)}  parent id={p.id} p={p.persistence}')
+                    for grandchild in child.children:
+                        children.append(grandchild)
+                        grandchild.parent = p
+                else:
+                    # print(f'merging pts: {p.id}  {p.persistence} {len(p.base_pts)}  child {child.id} {child.persistence} {len(child.base_pts)}')
+                    p.base_pts.extend(child.base_pts)
+                    p.extrema |= child.extrema
+                    if self.data_pts[child.min_idx] < self.data_pts[p.min_idx]:
+                        p.min_idx = child.min_idx
+                    if self.data_pts[child.max_idx] > self.data_pts[p.max_idx]:
+                        p.max_idx = child.max_idx
+            else:
+                children.append(child)
+        p.children = children
 
     def create_root(self):
         if len(self.active) != 1:
             print(len(self.active), 'active')
-            for p in self.active:
-                print(f'{p.id}: {p.min_idx} {p.max_idx}  pts={p.base_pts}')
-                if len(p.children) > 0:
-                    print('\t', [c.id for c in p.children])
+            # for p in self.active:
+            #     print(f'{p.id}: {p.min_idx} {p.max_idx}  pts={p.base_pts}')
+            #     if len(p.children) > 0:
+            #         print('\t', [c.id for c in p.children])
             raise RuntimeError('Error: found {} roots'.format(len(self.active)))
         self.root = self.active.pop()
-
-    # consistency checks
-
-    def check_partition(self, p):
-        min_v = self.data_pts[p.min_idx]
-        max_v = self.data_pts[p.max_idx]
-        if min_v > max_v:
-            print('*** min > max', min_v, max_v)
-        for pt_idx in p.base_pts:
-            if self.data_pts[pt_idx] < min_v:
-                print('*** Partition id:{} min:{} at {} found min:{} at {}'.format(p.id, min_v, p.min_idx, self.data_pts[pt_idx], pt_idx))
-            if self.data_pts[pt_idx] > max_v:
-                print('*** Partition id:{} max:{} at {} found max:{} at {}'.format(p.id, max_v, p.max_idx, self.data_pts[pt_idx], pt_idx))
 
     #
     # helpers
@@ -214,40 +255,12 @@ class Builder(object):
             partition = self.mapping[partition]
         return partition
 
-    def find_loop(self, dest):
-        loop = [dest]
-        while dest in self.mapping:
-            dest = self.mapping[dest]
-            loop.append(dest)
-        return loop
-
-    def find_unique(self):
-        count = defaultdict(int)
-        for p in self.active:
-            count[p.min_idx] += 1
-            count[p.max_idx] += 1
-        self.unique = {k for k, v in count.items() if v == 1}
-        print('   unique:', self.unique)
-        self.all = count
-
-    def remove_non_unique(self):
-        for p in self.active:
-            for idx in [p.min_idx, p.max_idx]:
-                if idx not in self.unique:
-                    if idx in p.base_pts:
-                        p.base_pts.remove(idx)
-                        print(f'{p.id}: removed non unique')
-                    else:
-                        print(f'{p.id}: min/max not found')
-                else:
-                    print(idx, 'not removed because it is unique')
-
-    def add(self, n):
+    def add_active(self, n):
         self.min_map[n.min_idx].add(n)
         self.max_map[n.max_idx].add(n)
         self.active.add(n)
 
-    def remove(self, p):
+    def remove_active(self, p):
         self.max_map[p.max_idx].discard(p)
         self.min_map[p.min_idx].discard(p)
         self.active.remove(p)
@@ -270,21 +283,31 @@ class Builder(object):
         partition.extrema = extrema
         return idx
 
-    def test_uniques(self):
-        for u in self.unique:
-            self.test_unique(u, self.root, 0)
+    def describe(self, p, depth):
+        print(f'{"."*depth} {p.id}: pts:{len(p.base_pts)} persistence={p.persistence} orig={p.orig}  base={p.base}')
+        for child in p.children:
+            self.describe(child, depth+1)
 
-    def test_unique(self, u, node, lvl):
-        if u == node.min_idx:
-            print('unique {} is min_idx for node {} lvl {}'.format(u, node.id, lvl))
-        if u == node.max_idx:
-            print('unique {} is max_idx for node {} lvl {}'.format(u, node.id, lvl))
-        if u in node.extrema:
-            print('unique {} in extrema for node {} lvl {}'.format(u, node.id, lvl))
-        if node.span[0] <= u < node.span[1]:
-            print('unique {} in span for node {} lvl {}'.format(u, node.id, lvl))
-        for child in node.children:
-            self.test_unique(u, child, lvl+1)
+    def count_pts(self):
+        pts = set()
+        extrema = set()
+        for p in self.active:
+            self._count(p, pts, extrema)
+        if len(pts) != len(self.data_pts):
+            s = set(pts)
+            s |= extrema
+            print(
+                f'lost some points: #pts={len(pts)}  #base_pts{len(self.data_pts)}  #extrema={len(extrema)}  #combined:{len(s)}')
+        if not extrema <= pts:
+            print(f'extrema not in points. extrema={extrema} #pts={len(pts)}')
+        return len(pts), len(extrema)
+
+    def _count(self, p, pts, extrema):
+        for pt in p.base_pts:
+            pts.add(pt)
+        extrema |= p.extrema
+        for child in p.children:
+            self._count(child, pts, extrema)
 
     def rename(self, node, idx):
         node.id = idx

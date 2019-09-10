@@ -1,11 +1,11 @@
-from traitlets import Bool, HasTraits, Instance, Set, This
-
+import pandas as pd
 from regulus.tree import HasTree, Node, Tree
 from regulus.core import HasAttrs
 
 
 class Partition(object):
-    def __init__(self, id_, persistence, pts_span=None, minmax_idx=None, extrema=(), max_merge=False, regulus=None):
+    def __init__(self, id_, persistence, pts_span=None, minmax_idx=None, extrema=(), max_merge=False,
+                 base=None, regulus=None):
         self.id = id_
         self.regulus = regulus
         self.persistence = persistence
@@ -14,8 +14,9 @@ class Partition(object):
         self.minmax_idx = minmax_idx if minmax_idx is not None else []
         self.extrema = list(extrema)
         self.max_merge = max_merge
-        self._idx = None
+        self.base = base
 
+        self._idx = None
         self._x = None
         self._y = None
         self._values = None
@@ -120,12 +121,6 @@ class RegulusTree(Tree, HasAttrs):
     def partitions(self):
         return self.items()
 
-    def partition(self, id):
-        for p in self.partitions():
-            if p.id == id:
-                return p
-        return None
-
     def partitions_with_parent(self):
         for node in iter(self):
             yield node.data, node.parent.data
@@ -137,8 +132,21 @@ class RegulusTree(Tree, HasAttrs):
                 partitions.add(p)
         return partitions
 
-    def find_partitions(self, l):
-        return list(filter(lambda p: p.id in l, self.partitions()))
+    def partition(self, id):
+        for p in self.partitions():
+            if p.id == id:
+                return p
+        return None
+
+    def find_partitions(self, selector):
+        if isinstance(selector, int):
+            f = lambda p: p.id == selector
+        elif callable(selector):
+            f = selector
+        else:
+            f = lambda p: p.id in selector
+
+        return list(filter(f, self.partitions()))
 
 
 class Regulus(HasAttrs, HasTree):
@@ -152,12 +160,37 @@ class Regulus(HasAttrs, HasTree):
         self.y = pts.y(measure)
         self.tree = tree if tree is not None else RegulusTree(regulus=self)
 
+    @property
+    def x(self):
+        return self.pts.x
+
+    @property
+    def values(self):
+        return self.pts.values
+
+    @property
+    def pts_with_values(self):
+        return pd.merge(left=self.pts.x,
+                        right=self.pts.values,
+                        left_index=True,
+                        right_index=True)
+
+    @property
+    def pts_with_y(self):
+        return pd.merge(left=self.pts.x,
+                        right=self.y,
+                        left_index=True,
+                        right_index=True)
+
     def apply(self, f):
         for node in self.tree:
             f(node.data, node=node)
 
     def partitions(self):
         return self.tree.partitions()
+
+    def find_partitions(self, selector):
+        return self.tree.find_partions(selector)
 
     def partition(self, id):
         return self.tree.partition(id)
