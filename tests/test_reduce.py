@@ -1,9 +1,9 @@
-from regulus.utils import io
-from regulus.tree import *
+import regulus
 
-gauss = io.load('gauss4')
 
-tree = gauss.tree
+def stat(tree):
+    for node, depth in regulus.traverse(tree.root, depth=True):
+        print('.'*depth,node.id)
 
 def f(c, n):
     attr = c.attr['fitness']
@@ -11,8 +11,15 @@ def f(c, n):
     return value > 0.4
 
 
-r = tree.reduce(filter=f)
+gauss = regulus.load('gauss4')
+tree = gauss.tree
 
-print('\treduced')
-for node, depth in traverse(r.root, depth=True):
-    print('.'*depth,node.ref)
+print('original')
+stat(tree)
+
+s = regulus.SimplifiedTree(tree, f)
+
+print('reduced')
+stat(s.tree)
+
+
