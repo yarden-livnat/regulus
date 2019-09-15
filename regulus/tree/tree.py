@@ -96,7 +96,7 @@ class Tree(object):
             for child in node.children:
                 children.extend(_reduce(child, child_offset))
                 child_offset += child.data.size()
-            if filter(self, node):
+            if len(node.children) == 0 or filter(self, node):
                 return [factory(data=node.data, children=children, offset=offset)]
             else:
                 return children
