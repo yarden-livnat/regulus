@@ -3,6 +3,8 @@ from sklearn import linear_model as lm
 
 
 def fitness(context, node):
+    if len(node.data.y) < 2:
+        return 0
     return context['linear'][node].score(node.data.x, node.data.y)
 
 
@@ -21,6 +23,8 @@ def stepwise_fitness(context, node):
 
 
 def relative_fitness(context, has_mode, has_pts):
+    if len(has_pts.data.y) < 2:
+        return 0
     return context['linear'][has_mode].score(has_pts.data.x, has_pts.data.y)
 
 
