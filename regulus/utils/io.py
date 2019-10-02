@@ -61,7 +61,8 @@ def from_csv(filename, **kwargs):
     pts = Data.read_csv(path.with_suffix('.csv'), ndims=ndims)
     t_read = process_time()
 
-    pts.normalize()
+    if kwargs.pop('normalize', True):
+        pts.normalize()
     regulus = msc(pts, **kwargs)
     t_msc = process_time()
 
@@ -73,9 +74,11 @@ def from_csv(filename, **kwargs):
     return regulus
 
 
-def from_df(pts, **kwargs):
+def from_df(df, **kwargs):
     t_start = process_time()
-    pts.normalize()
+    pts = Data.from_df(df, ndims = kwargs.pop('ndims', None))
+    if kwargs.pop('normalize', True):
+        pts.normalize()
     regulus = msc(pts, **kwargs)
     add_defaults(regulus)
 
