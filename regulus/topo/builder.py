@@ -198,14 +198,15 @@ class Builder(object):
                     new_partition.min_idx = merge.dest
                 new_partition.extrema.add(merge.dest)
                 add_partitions.append(new_partition)
+
                 remove_partitions.add(s)
             else:
+                self.remove_active(s)
                 if merge.is_max:
                     s.max_idx = merge.dest
                 else:
                     s.min_idx = merge.dest
                 s.extrema.add(merge.dest)
-                self.remove_active(s)
                 self.add_active(s)
 
         for r in remove_partitions:
@@ -261,8 +262,8 @@ class Builder(object):
         self.active.add(n)
 
     def remove_active(self, p):
-        self.max_map[p.max_idx].discard(p)
         self.min_map[p.min_idx].discard(p)
+        self.max_map[p.max_idx].discard(p)
         self.active.remove(p)
 
     def build_idx(self, partition, idx):
