@@ -41,6 +41,8 @@ def add_defaults(regulus):
     regulus.add_attr(stepwise_fitness)
     regulus.add_attr(node_min, name='min')
     regulus.add_attr(node_max, name='max')
+    regulus.add_attr(inverse_regression)
+    regulus.add_attr(inverse_regression_scale)
 
     regulus.tree.add_attr(parent_fitness, range=UNIT_RANGE)
     regulus.tree.add_attr(child_fitness, range=UNIT_RANGE)
@@ -70,7 +72,8 @@ def from_csv(filename, **kwargs):
 
     # save(regulus, filename=path.with_suffix('.regulus'))
     t_end = process_time()
-    print(f'time: {t_end - t_start:.3} read:{t_read-t_start:.3} msc:{t_msc-t_read:.3}  save:{t_end-t_msc:.3}')
+    if kwargs.get('debug', False):
+        print(f'time: {t_end - t_start:.3} ')
     return regulus
 
 
@@ -83,5 +86,6 @@ def from_df(df, **kwargs):
     add_defaults(regulus)
 
     t_end = process_time()
-    print(f'time: {t_end - t_start:.3}')
+    if kwargs.get('debug', False):
+        print(f'time: {t_end - t_start:.3}')
     return regulus
