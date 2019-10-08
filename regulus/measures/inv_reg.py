@@ -1,46 +1,69 @@
-from .null_model import NullModel
-from sklearn.kernel_ridge import KernelRidge
 import numpy as np
 import pandas as pd
+
+TAU = 0.1
+N = 20
 
 
 def radial_kernel(x0, X, tau):
     return np.exp(np.sum((X - x0) ** 2, axis=1) / (-2 * tau * tau))
 
 
-def lowess(x0, X, Y, tau):
+def lowess(X, Y, tau):
     # add bias term
-    x0 = np.r_[1, x0]
     X = np.c_[np.ones(len(X)), X]
-    # fit model: normal equations with kernel
-    xw = X.T * radial_kernel(x0, X, tau)
-    beta = np.linalg.pinv(xw @ X) @ xw @ Y
 
-    # predict value
-    return x0 @ beta
+    def f(x):
+        x = np.r_[1, x]
+        # fit model: normal equations with kernel
+        xw = X.T * radial_kernel(x, X, tau)
+        beta = np.linalg.pinv(xw @ X) @ xw @ Y
+        # predict value
+        return x @ beta
+    return f
+
+
+def sample_lowess(S, X, Y, tau=TAU):
+    f = lowess(X, Y, tau)
+    return np.array([f(s) for s in S])
+
+
+def inverse_lowess(X, Y, n=N, tau=TAU):
+    S = np.linspace(np.amin(Y), np.amax(Y), n)
+    return sample_lowess(S, Y, X, tau)
+
+
+def inverse_lowess_std(X, Y, n=N, tau=TAU):
+    rho = (sample_lowess(Y, Y, X, tau) - X) ** 2
+
+    Y1 = np.c_[np.ones(len(Y)), Y]
+    S = np.linspace(np.amin(Y), np.amax(Y), n)
+    S1 = np.c_[np.ones(len(S)), S]
+    W = np.array([radial_kernel(s, Y1, tau) for s in S1])
+    denom = np.sum(W, axis=1)
+
+    wr = W @ rho
+    std = np.c_[[wr[c]/denom for c in list(wr)]]
+    return std.T
 
 
 def inverse_regression(context, node):
     partition = node.data
     if partition.y.size < 2:
         return []
-    
+
+    X = partition.x
+    Y = partition.y
+    S = np.linspace(np.amin(Y), np.amax(Y), N)
+    line = sample_lowess(S, Y, X)
+    std = inverse_lowess_std(X, Y)
+    return {'x': pd.DataFrame(line, columns=list(X)), 'y': S, 'std': pd.DataFrame(std, columns=list(X))}
 
 
-
-def inverse_ridge(context, node):
-    partition = node.data
-    if partition.y.size < 2:
-        return NullModel()
-    model = KernelRidge(alpha=1.0, kernel='rbf')
-    model.fit(pd.DataFrame({'Y': partition.y}), partition.original_x)
-    return model
-
-def inverse_curve(context, node):
-    if len(node.data.y) < 2:
-        return []
-    inv_model = context['inverse_ridge'][node]
-    partition = node.data
-    y = np.linspace(np.amin(partition.y), np.amax(partition.y), 100)
-    x = inv_model.predict(pd.DataFrame({'Y': y}))
-    return list(zip(x, y))
+def inverse_regression_scale(context, node):
+    d = context['inverse_regression'][node]
+    s = node.regulus.pts.scaler
+    return {'x': s.inverse_transform(d['x'], copy=True),
+            'y': d['y'],
+            'std': s.inverse_transform(d['std'], copy=True)
+            }
