@@ -18,6 +18,7 @@ class Partition(object):
 
         self._idx = None
         self._x = None
+        self._original_x = None
         self._y = None
         self._values = None
 
@@ -39,7 +40,8 @@ class Partition(object):
     def idx(self):
         if self._idx is None:
             loc = self.regulus.pts_loc
-            idx = loc[self.pts_span[0]:self.pts_span[1] - 1]
+            # idx = loc[self.pts_span[0]:self.pts_span[1] - 1]
+            idx = loc[self.pts_span[0]:self.pts_span[1]]
             # idx = [loc[i] for i in range(self.pts_span[0], self.pts_span[1] - 1)]
             idx.extend(self.extrema)
             self._idx = idx
@@ -48,13 +50,22 @@ class Partition(object):
     @property
     def x(self):
         if self._x is None:
-            self._get_pts()
+            idx = self.idx
+            self._x = self.regulus.pts.x.loc[idx]
         return self._x
+
+    @property
+    def original_x(self):
+        if self._original_x is None:
+            idx = self.idx
+            self._original_x = self.regulus.pts.original_x.loc[idx]
+        return self._original_x
 
     @property
     def y(self):
         if self._y is None:
-            self._get_pts()
+            idx = self.idx
+            self._y = self.regulus.y[idx]
         return self._y
 
     @property
@@ -106,6 +117,8 @@ class RegulusTree(Tree, HasAttrs):
         for node in self:
             if not hasattr(node, 'offset'):
                 node.offset = 0
+            if not hasattr(node, 'regulus'):
+                node.regulus = self.regulus
 
     def retrieve(self, name):
         attr = self.attr[name]
@@ -161,6 +174,10 @@ class Regulus(HasAttrs, HasTree):
         self.tree = tree if tree is not None else RegulusTree(regulus=self)
 
     @property
+    def scaler(self):
+        return self.pts.scaler
+
+    @property
     def x(self):
         return self.pts.x
 
@@ -197,6 +214,18 @@ class Regulus(HasAttrs, HasTree):
 
     def nodes(self):
         return iter(self.tree)
+
+    def find_nodes(self, ids):
+        s = set(ids)
+        nodes = []
+        for node in self.nodes():
+            if node.id in s:
+                nodes.append(node)
+                s.remove(node.id)
+                if len(s) == 0:
+                    break
+        return nodes
+
 
     def gc(self):
         for p in self.tree.partitions():

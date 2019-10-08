@@ -11,6 +11,7 @@ class Merge(object):
 
 class PartitionNode(object):
     _id_generator = -1
+    _pts = None
 
     @staticmethod
     def gen_id():
@@ -18,8 +19,9 @@ class PartitionNode(object):
         return PartitionNode._id_generator
 
     @staticmethod
-    def reset():
+    def reset(pts):
         PartitionNode._id_generator = -1
+        PartitionNode._pts = pts
 
     def __init__(self, persistence, base_pts=None, min_idx=None, max_idx=None, from_partition=None, is_max=None):
         self.id = PartitionNode.gen_id()
@@ -37,33 +39,42 @@ class PartitionNode(object):
         self.max_merge = is_max
 
         if from_partition is not None:
-            self.add_child(from_partition, pts=None)
+            self.add_child(from_partition)
             self.base = from_partition.base
         else:
             self.extrema.add(self.min_idx)
             self.extrema.add(self.max_idx)
 
-    def add_child(self, child, pts):
+    def add_child(self, child):
         child.parent = self
         self.children.append(child)
         self.extrema |= child.extrema
-        if pts is None or pts[child.min_idx] < pts[self.min_idx]:
+        if self.min_idx is None or PartitionNode._pts[child.min_idx] < PartitionNode._pts[self.min_idx]:
             self.min_idx = child.min_idx
             self.orig = child
             self.base = child.base
-        if pts is None or pts[child.max_idx] > pts[self.max_idx]:
+        if self.max_idx is None or PartitionNode._pts[child.max_idx] > PartitionNode._pts[self.max_idx]:
             self.max_idx = child.max_idx
             self.orig = child
             self.base = child.base
 
-    def merge(self, other, pts):
+    def add_extrema(self, extrema_idx):
+        if PartitionNode._pts[extrema_idx] <= PartitionNode._pts[self.min_idx]:
+            self.min_idx = extrema_idx
+        elif PartitionNode._pts[self.max_idx] <= PartitionNode._pts[extrema_idx]:
+            self.max_idx = extrema_idx
+        else:
+            print("*** BUG: extrema_idx is not an extrema")
+        self.extrema.add(extrema_idx)
+
+    def merge(self, other):
         self.base_pts.extend(other.base_pts)
         self.extrema |= other.extrema
-        if pts is None or pts[other.min_idx] < pts[self.min_idx]:
+        if PartitionNode._pts[other.min_idx] < PartitionNode._pts[self.min_idx]:
             self.min_idx = other.min_idx
             self.orig = other
             self.base = other.base
-        if pts is None or pts[other.max_idx] > pts[self.max_idx]:
+        if PartitionNode._pts[other.max_idx] > PartitionNode._pts[self.max_idx]:
             self.max_idx = other.max_idx
             self.orig = other
             self.base = other.base
@@ -103,16 +114,18 @@ class Builder(object):
         self.count_pts()
         self.merge()
         self.create_root()
-        print('simplification:')
-        print(f'\tbefore: partitions:{self.total(self.root)}  depth={self.depth(self.root, 0)}')
+        if self.debug:
+            print('simplification:')
+            print(f'\tbefore: partitions:{self.total(self.root)}  depth={self.depth(self.root, 0)}')
         self.simplify(self.root)
-        print(f'\tafter:  partitions={self.total(self.root)}  depth={self.depth(self.root, 0)}')
+        if self.debug:
+            print(f'\tafter:  partitions={self.total(self.root)}  depth={self.depth(self.root, 0)}')
 
         self.single = 0
         idx = self.build_idx(self.root, 0)
 
         self.rename(self.root, 0)
-        if self.single > 0:
+        if self.debug and self.single > 0:
             print('found {} singles'.format(self.single))
         if len(self.pts) != len(self.data_pts):
             print(f'*** error: data has {len(self.data_pts)} but only {len(self.pts)} are accounted for')
@@ -133,7 +146,7 @@ class Builder(object):
         return pd
 
     def prepare(self):
-        PartitionNode.reset()
+        PartitionNode.reset(self.data_pts)
         for key, pts in self.base.items():
             p = PartitionNode(persistence=0, base_pts=pts.tolist(), min_idx=key[0], max_idx=key[1])
             self.maxima.add(key[1])
@@ -183,35 +196,27 @@ class Builder(object):
                         new_partition = PartitionNode(merge.level, from_partition=d, is_max=merge.is_max)
                         remove_partitions.add(d)  # can't be removed during the loop
                         add_partitions.append(new_partition)
-                    new_partition.add_child(s, self.data_pts)
+                    new_partition.add_child(s)
                     remove_src.add(s)
             for s in remove_src:
                 self.remove_active(s)
 
-        for s in idx_map[merge.src]:
+        sources = set(idx_map[merge.src])
+        for s in sources:
             if s.persistence != merge.level:
                 # create a new partition with a single child because the extrema value has changed
                 new_partition = PartitionNode(merge.level, from_partition=s)
-                if merge.is_max:
-                    new_partition.max_idx = merge.dest
-                else:
-                    new_partition.min_idx = merge.dest
-                new_partition.extrema.add(merge.dest)
+                new_partition.add_extrema(merge.dest)
                 add_partitions.append(new_partition)
-
                 remove_partitions.add(s)
             else:
+                # degenerated case: reuse the partition
                 self.remove_active(s)
-                if merge.is_max:
-                    s.max_idx = merge.dest
-                else:
-                    s.min_idx = merge.dest
-                s.extrema.add(merge.dest)
+                s.add_extrema(merge.dest)
                 self.add_active(s)
 
         for r in remove_partitions:
             self.remove_active(r)
-
         for partition in add_partitions:
             self.add_active(partition)
 
@@ -240,10 +245,6 @@ class Builder(object):
     def create_root(self):
         if len(self.active) != 1:
             print(len(self.active), 'active')
-            # for p in self.active:
-            #     print(f'{p.id}: {p.min_idx} {p.max_idx}  pts={p.base_pts}')
-            #     if len(p.children) > 0:
-            #         print('\t', [c.id for c in p.children])
             raise RuntimeError('Error: found {} roots'.format(len(self.active)))
         self.root = self.active.pop()
 
@@ -280,7 +281,8 @@ class Builder(object):
                 idx = self.build_idx(child, idx)
 
         partition.span = (first, idx)
-        extrema = set(filter(lambda p: p not in self.pts[first:idx], partition.extrema))
+        span = self.pts[first:idx]
+        extrema = set(filter(lambda p: p not in span, partition.extrema))
         partition.extrema = extrema
         return idx
 
@@ -318,52 +320,6 @@ class Builder(object):
                 idx = self.rename(child, idx)
         return idx
 
-    #
-    # save
-    #
-
-    def visit(self, p, visitor):
-        visitor(p)
-        for child in p.children:
-            self.visit(child, visitor)
-
-    def get_tree(self, name, params=''):
-        partitions = []
-        self.collect_partitions(self.root, partitions)
-        tree = {
-            'partitions': partitions,
-            'pts_idx': self.pts
-        }
-        return tree
-
-    def collect_partitions(self, node, array):
-        array.append({
-            'id': node.id,
-            'lvl': node.persistence,
-            'span': [node.span[0], node.span[1]],
-            'minmax_idx': [node.min_idx, node.max_idx],
-            'merge': 'max' if node.is_max_merge else 'min',
-            'parent': node.parent.id if node.parent is not None else None,
-            'children': [child.id for child in node.children] if node.persistence > 0 else []
-        })
-
-        self.check_partition(node)
-
-        if node.persistence > 0:
-            if len(node.children) > 2:
-                print('\t{} has {} children at level {}'.format(node.id, len(node.children), node.persistence))
-            for child in node.children:
-                self.collect_partitions(child, array)
-
-    #
-    # verify
-    #
-
-    def verify(self):
-        if self.debug:
-            self.statistics()
-        return self
-
     def statistics(self):
         levels = defaultdict(list)
         self.stat(self.root, levels)
@@ -374,12 +330,5 @@ class Builder(object):
                 n += len(levels[level])
             else:
                 b = len(levels[level])
-        print('\tstatistics: {} levels {} base, {} new'.format(len(levels), b, n))
-        # for level in sorted(levels.keys()):
-        #     print("{:.2g} {}".format(level, len(levels[level])))
+        print('statistics: {} levels {} base, {} new'.format(len(levels), b, n))
 
-    def stat(self, node, levels):
-        levels[node.persistence].append(node)
-        if node.persistence > 0:
-            for child in node.children:
-                self.stat(child, levels)

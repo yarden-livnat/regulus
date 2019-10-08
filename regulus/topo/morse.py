@@ -54,8 +54,6 @@ def msc(data, kind='smale', measure=None, knn=defaults.knn, beta=defaults.beta, 
     builder.msc(topo.base_partitions, topo.get_merge_sequence())
 
     builder.build()
-    if debug:
-        builder.verify()
 
     regulus = Regulus(data, builder.pts, measure, type=kind)
     regulus.tree.root  = _visit(builder.root, None, regulus, 0)
