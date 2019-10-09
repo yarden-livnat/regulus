@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-TAU = 0.5
+TAU = 0.1
 N = 40
 
 
@@ -57,7 +57,7 @@ def inverse_regression(context, node):
     S = np.linspace(np.amin(Y), np.amax(Y), N)
     line = sample_lowess(S, Y, X)
     std = inverse_lowess_std(X, Y)
-    return [dict(x=line[:,c], y=S, std=std[:, c]) for c in X.shape[1]]
+    return [dict(x=line[:, c], y=S, std=std[:, c]) for c in X.shape[1]]
 
 
 def inverse_regression_scale(context, node):

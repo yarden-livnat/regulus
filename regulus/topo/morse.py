@@ -56,7 +56,8 @@ def msc(data, kind='smale', measure=None, knn=defaults.knn, beta=defaults.beta, 
     builder.build()
 
     regulus = Regulus(data, builder.pts, measure, type=kind)
-    regulus.tree.root  = _visit(builder.root, None, regulus, 0)
+    regulus.tree.root = _visit(builder.root, None, regulus, 0)
+
     return regulus
 
 
