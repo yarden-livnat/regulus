@@ -93,6 +93,8 @@ class RegulusTree(Tree, HasAttrs):
         HasAttrs.__init__(self, regulus.attr, auto or [])
         self.regulus = regulus
         self.root = root
+        self._persistence_levels = None
+        self._partitions = {}
 
     def clone(self, root=None):
         return RegulusTree(root=root, regulus=self.regulus, auto=self.auto)
@@ -114,6 +116,9 @@ class RegulusTree(Tree, HasAttrs):
         if value is not None and value.parent is None:
             sentinal = Node(ref=-1, data=Partition(-1, 1, regulus=self.regulus),
                             children=[value], offset=0)
+        for p in self.partitions():
+            self._partitions[p.id] = p
+
         for node in self:
             if not hasattr(node, 'offset'):
                 node.offset = 0
@@ -146,10 +151,11 @@ class RegulusTree(Tree, HasAttrs):
         return partitions
 
     def partition(self, id):
-        for p in self.partitions():
-            if p.id == id:
-                return p
-        return None
+        return self._partitions.get(id, None)
+        # for p in self.partitions():
+        #     if p.id == id:
+        #         return p
+        # return None
 
     def find_partitions(self, selector):
         if isinstance(selector, int):
@@ -158,8 +164,13 @@ class RegulusTree(Tree, HasAttrs):
             f = selector
         else:
             f = lambda p: p.id in selector
-
         return list(filter(f, self.partitions()))
+
+    def persistence_levels(self):
+        if self._persistence_levels is None:
+            levels = {p.persistence for p in self.partitions()}
+            self._persistence_levels = sorted(levels)
+        return self._persistence_levels
 
 
 class Regulus(HasAttrs, HasTree):
@@ -225,7 +236,6 @@ class Regulus(HasAttrs, HasTree):
                 if len(s) == 0:
                     break
         return nodes
-
 
     def gc(self):
         for p in self.tree.partitions():
