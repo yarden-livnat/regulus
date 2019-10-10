@@ -5,6 +5,8 @@ def no_op(x):
 
 
 class Cache(object):
+    _counter = 0
+
     def __init__(self, parent=None, key=None, factory=None, **kwargs):
         self.parent = parent
         self.factory = factory if not None else no_op
