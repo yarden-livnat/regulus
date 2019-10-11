@@ -70,7 +70,6 @@ def from_csv(filename, **kwargs):
 
     add_defaults(regulus)
 
-    # save(regulus, filename=path.with_suffix('.regulus'))
     t_end = process_time()
     if kwargs.get('debug', False):
         print(f'time: {t_end - t_start:.3} ')
