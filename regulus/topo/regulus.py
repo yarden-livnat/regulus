@@ -152,10 +152,6 @@ class RegulusTree(Tree, HasAttrs):
 
     def partition(self, id):
         return self._partitions.get(id, None)
-        # for p in self.partitions():
-        #     if p.id == id:
-        #         return p
-        # return None
 
     def find_partitions(self, selector):
         if isinstance(selector, int):

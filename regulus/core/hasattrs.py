@@ -57,7 +57,8 @@ class HasAttrs(object):
         for entry in auto:
             self.add_attr(*entry)
 
-    def add_attr(self, factory, name=None, key=_attr_key, range=None, **kwargs):
+    def add_attr(self, factory, name=None, key=_attr_key, range=None, save=True, **kwargs):
+        """override previous attribute if one exists"""
         if name is None:
             if factory.__name__ == '<lambda>':
                 print('Error: a name must be given for a lambda expression')
@@ -67,13 +68,24 @@ class HasAttrs(object):
         if range is None:
             range = AttrRange('auto')
 
-        self.attr[name] = Cache(key=key, factory=_wrap_factory(self.attr, factory), range=range, **kwargs)
-        for i, entry in enumerate(self.auto):
-            if entry[1] == name:
-                self.auto[i] = [factory, name, key, range]
-                break
+        self.attr[name] = Cache(key=key, factory=factory, context=self.attr, range=range, save=save, **kwargs)
+        # for i, entry in enumerate(self.auto):
+        #     if entry[1] == name:
+        #         self.auto[i] = [factory, name, key, range]
+        #         break
+        # else:
+        #     self.auto.append([factory, name, key, range])
+
+    def update_attr(self, factory, name=None):
+        if name is None:
+            if factory.__name__ == '<lambda>':
+                print('Error: a name must be given for a lambda expression')
+                return
+            name = factory.__name__
+        if name in self.attr:
+            self.attr[name].factory = factory
         else:
-            self.auto.append([factory, name, key, range])
+            raise ValueError(f'Attribute {name} not found')
 
     def __contains__(self, attr):
         """check is attr in cache"""
@@ -81,8 +93,9 @@ class HasAttrs(object):
 
     def __setstate__(self, state):
         self.__dict__.update(state)
-        for factory, name, key, range in self.auto:
-            self.attr[name].factory = _wrap_factory(self.attr, factory)
+        # for factory, name, key, range in self.auto:
+        #     # self.attr[name].factory = factory
+        #     self.attr[name].factory = _wrap_factory(self.attr, factory)
 
 
 UNIT_RANGE = AttrRange(type='fixed', v=(0,1))
