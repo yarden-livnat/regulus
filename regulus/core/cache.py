@@ -44,6 +44,9 @@ class Cache(object):
             return self.factory(self.context, *obj)
         return self.factory(self.context, obj)
 
+    def clear(self):
+        self.cache = {}
+
     def compute(self, obj):
         self.__getitem__(obj)
 

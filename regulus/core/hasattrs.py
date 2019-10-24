@@ -87,6 +87,12 @@ class HasAttrs(object):
         else:
             raise ValueError(f'Attribute {name} not found')
 
+    def clear_attr(self, name):
+        if name in self.attr:
+            self.attr[name].clear()
+        else:
+            raise ValueError(f'Attribute {name} not found')
+
     def __contains__(self, attr):
         """check is attr in cache"""
         return attr in self.attr
