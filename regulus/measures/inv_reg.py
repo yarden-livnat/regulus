@@ -51,11 +51,15 @@ def inverse_lowess_std(X, Y, n=N, kernel=GAUSSIAN):
     S = np.linspace(np.amin(Y), np.amax(Y), n)
     S1 = np.c_[np.ones(len(S)), S]
     W = np.array([kernel(s, Y1) for s in S1])
-    denom = np.sum(W, axis=1)
+    denom = W.sum(axis=1)
 
     rho = (inverse_lowess(X, Y, S=Y, kernel=kernel) - X) ** 2
     wr = W @ rho
-    std = np.c_[[wr[c]/denom for c in list(wr)]]
+    std = np.sqrt(np.c_[[wr[c]/denom for c in list(wr)]])
+
+    d = np.sqrt(np.sum(rho, axis=1))
+    Wd = np.array([W[i, :] * d for i in range(W.shape[0])])
+    avg_std = np.sqrt(np.c_[[Wd[c]/denom for c in list(wr)]])
     return std.T
 
 
