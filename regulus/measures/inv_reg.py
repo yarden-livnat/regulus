@@ -57,9 +57,9 @@ def inverse_lowess_std(X, Y, n=N, kernel=GAUSSIAN):
     wr = W @ rho
     std = np.sqrt(np.c_[[wr[c]/denom for c in list(wr)]])
 
-    d = np.sqrt(np.sum(rho, axis=1))
-    Wd = np.array([W[i, :] * d for i in range(W.shape[0])])
-    avg_std = np.sqrt(np.c_[[Wd[c]/denom for c in list(wr)]])
+    # d = np.sqrt(np.sum(rho, axis=1))
+    # Wd = np.array([W[i, :] * d for i in range(W.shape[0])])
+    # avg_std = np.sqrt(np.c_[[Wd[c]/denom for c in list(wr)]])
     return std.T
 
 
@@ -84,3 +84,13 @@ def inverse_regression(kernel=GAUSSIAN, scale=True):
         S, line, std = inverse(partition.x, partition.y, kernel, scaler)
         return [dict(x=line[:, c], y=S, std=std[:, c]) for c in range(partition.x.shape[1])]
     return f
+
+
+def default_inverse_regression(context, node):
+    partition = node.data
+    if partition.y.size < 2:
+        return []
+
+    scaler = node.regulus.pts.scaler
+    S, line, std = inverse(partition.x, partition.y, GAUSSIAN, scaler)
+    return [dict(x=line[:, c], y=S, std=std[:, c]) for c in range(partition.x.shape[1])]

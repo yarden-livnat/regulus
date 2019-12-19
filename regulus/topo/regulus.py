@@ -92,9 +92,9 @@ class RegulusTree(Tree, HasAttrs):
         Tree.__init__(self, root)
         HasAttrs.__init__(self, regulus.attr, auto or [])
         self.regulus = regulus
-        self.root = root
         self._persistence_levels = None
         self._partitions = {}
+        self.root = root
 
     def clone(self, root=None):
         return RegulusTree(root=root, regulus=self.regulus, auto=self.auto)
