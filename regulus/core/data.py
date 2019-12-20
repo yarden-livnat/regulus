@@ -41,12 +41,12 @@ class Data(object):
     def size(self):
         return len(self.values)
 
-    @property
-    def original_x(self):
-        return self.x if self.scaler is None else pd.DataFrame(self.scaler.inverse_transform(self.x, copy=True), columns=self.x.columns)
-
-    def inverse(self, x):
-        return x if self.scaler is None else pd.DataFrame(self.scaler.inverse_transform(x, copy=True), columns=x.columns)
+    def inverse(self, values):
+        return values if self.scaler is None else pd.DataFrame(self.scaler.inverse_transform(values, copy=True), columns=values.columns)
 
     def y(self, measure):
         return self.values.loc[:, measure]
+
+    @property
+    def original_x(self):
+        return self.inverse(self.x)
