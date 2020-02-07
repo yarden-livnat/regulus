@@ -22,10 +22,10 @@ def stepwise_fitness(context, node):
     return fitness
 
 
-def relative_fitness(context, has_mode, has_pts):
+def relative_fitness(context, has_model, has_pts):
     if len(has_pts.data.y) < 2:
         return 0
-    return context['linear'][has_mode].score(has_pts.data.x, has_pts.data.y)
+    return context['linear'][has_model].score(has_pts.data.x, has_pts.data.y)
 
 
 def parent_fitness(context, node):

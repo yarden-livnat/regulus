@@ -1,5 +1,6 @@
 from time import process_time
 
+
 def timed(method):
     def _timed(*args, **kwargs):
         start = process_time()
