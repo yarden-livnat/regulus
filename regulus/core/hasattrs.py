@@ -1,3 +1,4 @@
+from traitlets import HasTraits, Tuple, Unicode
 from .cache import Cache
 
 
@@ -48,7 +49,10 @@ def _wrap_factory(context, func):
     return wrapper
 
 
-class HasAttrs(object):
+class HasAttrs(HasTraits):
+
+    state = Tuple(Unicode(), Unicode())
+
     def __init__(self, parent=None, auto=()):
         range = None
         if parent is not None:
@@ -58,6 +62,15 @@ class HasAttrs(object):
         self.auto = []
         for entry in auto:
             self.add_attr(*entry)
+
+    # def _reset_attr(self, name):
+    #     if name in self.attrs:
+    #         s = set(self.attr)
+    #         s.remove(name)
+    #         self.attrs = s
+    #     s = set(self.attr)
+    #     s.add(name)
+    #     self.attrs = s
 
     def add_attr(self, factory, name=None, key=_attr_key, range=None, save=True, **kwargs):
         """override previous attribute if one exists"""
@@ -70,7 +83,12 @@ class HasAttrs(object):
         if range is None:
             range = AttrRange('auto')
 
+        if name not in self.attr:
+            op = 'add'
+        else:
+            op = 'change'
         self.attr[name] = Cache(key=key, factory=factory, context=self.attr, range=range, save=save, **kwargs)
+        self.state = (op, name)
         # for i, entry in enumerate(self.auto):
         #     if entry[1] == name:
         #         self.auto[i] = [factory, name, key, range]
@@ -86,6 +104,7 @@ class HasAttrs(object):
             name = factory.__name__
         if name in self.attr:
             self.attr[name].factory = factory
+            self.state = ('change', name)
         else:
             raise ValueError(f'Attribute {name} not found')
 
