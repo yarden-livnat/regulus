@@ -31,7 +31,9 @@ class AttrRange(object):
 def _attr_key(obj):
     if isinstance(obj,tuple):
         return ':'.join(map(lambda o: str(o.id), obj))
-    return obj.id
+    if hasattr(obj, 'id'):
+        return obj.id
+    return obj
 
 
 def _dict(_):
