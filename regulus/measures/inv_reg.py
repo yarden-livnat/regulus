@@ -87,10 +87,15 @@ def inverse_regression(kernel=GAUSSIAN, scale=True):
 
 
 def default_inverse_regression(context, node):
-    partition = node.data
+    if hasattr(node, 'data'):
+        partition = node.data
+    else:
+        partition = node
     if partition.y.size < 2:
         return []
 
+    sigma = 0.3 * (partition.max() - partition.min())
+    kernel = gaussian(sigma)
     scaler = node.regulus.pts.scaler
-    S, line, std = inverse(partition.x, partition.y, GAUSSIAN, scaler)
+    S, line, std = inverse(partition.x, partition.y, kernel, scaler)
     return [dict(x=line[:, c], y=S, std=std[:, c]) for c in range(partition.x.shape[1])]
