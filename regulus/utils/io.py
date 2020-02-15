@@ -41,7 +41,19 @@ def add_defaults(regulus):
     regulus.add_attr(stepwise_fitness)
     regulus.add_attr(node_min, name='min')
     regulus.add_attr(node_max, name='max')
-    # regulus.add_attr(default_inverse_regression, name='inverse_regression')
+    regulus.add_attr(unique_max, range=UNIT_RANGE)
+    regulus.add_attr(unique_min, range=UNIT_RANGE)
+
+    regulus.add_attr(dim_models)
+
+    regulus.add_attr(dim_scores)
+    regulus.add_attr(dim_min_fitness)
+    regulus.add_attr(dim_max_fitness)
+    regulus.add_attr(relative_dim_score)
+    regulus.add_attr(dim_parent_score)
+    regulus.add_attr(dim_child_score)
+
+    regulus.add_attr(default_inverse_regression, name='inverse_regression')
 
     regulus.tree.add_attr(parent_fitness, range=UNIT_RANGE)
     regulus.tree.add_attr(child_fitness, range=UNIT_RANGE)

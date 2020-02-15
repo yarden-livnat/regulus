@@ -1,5 +1,6 @@
 from types import SimpleNamespace
 from topopy.MorseSmaleComplex import MorseSmaleComplex
+import nglpy as ngl
 
 from regulus.topo.builder import Builder
 from regulus.topo import Regulus, Partition
@@ -19,6 +20,8 @@ defaults = SimpleNamespace(
 def msc(data, kind='smale', measure=None, knn=defaults.knn, beta=defaults.beta, norm=defaults.norm,
         graph=defaults.graph, gradient=defaults.gradient, aggregator=defaults.aggregator, connect=defaults.connect,
         debug=False):
+    """Compute a Morse-Smale Complex"""
+
     if measure is None:
         measure = list(data.values.columns)[-1]
     elif type(measure) == int:
@@ -26,7 +29,7 @@ def msc(data, kind='smale', measure=None, knn=defaults.knn, beta=defaults.beta, 
 
     # TODO: that's an unexpected side-effect.
     #       either make the user do this step outside of this function or
-    #       povide a parameter to explicitly ask for that
+    #       provide a parameter to explicitly ask for that
     # topopy ver 1.0: comment out. Is this correct?
     # x, values = TopologicalObject.aggregate_duplicates(data.x.values, data.values.values)
     # if x.shape != data.x.shape:
@@ -35,12 +38,15 @@ def msc(data, kind='smale', measure=None, knn=defaults.knn, beta=defaults.beta, 
 
     y = data.values.loc[:, measure]
 
-    """Compute a Morse-Smale Complex"""
     topo = MorseSmaleComplex(graph=graph, gradient=gradient, max_neighbors=knn, beta=beta,
                              normalization=norm, aggregator=aggregator, connect=connect)
     # topopy ver 1.0: remove names
     # topo.build(X=data.x.values, Y=y.values, names=list(data.x.columns)+[y.name])
     topo.build(X=data.x.values, Y=y.values)
+
+    # topopy version 1.0.0
+    # graph = ngl.EmptyRegionGraph(beta=beta, relaxed=False, p=2.0)
+    # topo = MorseSmaleComplex(graph=graph, gradient=gradient, normalization=norm, aggregator=aggregator)
 
     builder = Builder(debug).data(y)
 

@@ -40,10 +40,14 @@ class Partition(object):
     def idx(self):
         if self._idx is None:
             loc = self.regulus.pts_loc
-            # idx = loc[self.pts_span[0]:self.pts_span[1] - 1]
             idx = loc[self.pts_span[0]:self.pts_span[1]]
-            # idx = [loc[i] for i in range(self.pts_span[0], self.pts_span[1] - 1)]
             idx.extend(self.extrema)
+
+            # testing: remove min_max
+            # for v in self.minmax_idx:
+            #     if v in idx:
+            #         idx.remove(v)
+
             self._idx = idx
         return self._idx
 

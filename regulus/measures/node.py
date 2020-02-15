@@ -1,3 +1,5 @@
+import random
+
 def node_size(context, node):
     return node.data.size()
 
@@ -16,3 +18,18 @@ def node_max(context, node):
 
 def node_min(context, node):
     return node.data.min()
+
+
+def cmap_id(context, id):
+    '''assign a random  number for an id'''
+    return random.uniform(0,1)
+
+
+def unique_max(tree, node):
+    id = node.data.minmax_idx[1]
+    return tree['cmap_id'][id]
+
+
+def unique_min(tree, node):
+    id = node.data.minmax_idx[0]
+    return tree['cmap_id'][id]
