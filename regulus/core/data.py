@@ -10,7 +10,6 @@ class Data(object):
 
     @staticmethod
     def read_csv(filename, ndims=None):
-
         return Data.from_df(pd.read_csv(filename), ndims=ndims)
 
     @staticmethod

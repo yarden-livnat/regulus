@@ -41,6 +41,8 @@ def add_defaults(regulus):
     regulus.add_attr(stepwise_fitness)
     regulus.add_attr(node_min, name='min')
     regulus.add_attr(node_max, name='max')
+
+    regulus.add_attr(unique_id, range=UNIT_RANGE)
     regulus.add_attr(unique_max, range=UNIT_RANGE)
     regulus.add_attr(unique_min, range=UNIT_RANGE)
 
