@@ -43,10 +43,12 @@ def sample_lowess(S, X, Y, kernel=GAUSSIAN):
 def inverse_lowess(X, Y, S=None, n=N, kernel=GAUSSIAN):
     if S is None:
         S = np.linspace(np.amin(Y), np.amax(Y), n)
-    return sample_lowess(S, Y, X, kernel)
+    return sample_lowess(S, Y, X, kernel)  # note swap of X and Y
 
 
-def inverse_lowess_std(X, Y, n=N, kernel=GAUSSIAN):
+def inverse_lowess_std(X, Y, n=N, S=None, kernel=GAUSSIAN):
+    if S is None:
+        S = np.linspace(np.amin(Y), np.amax(Y), n)
     Y1 = np.c_[np.ones(len(Y)), Y]
     S = np.linspace(np.amin(Y), np.amax(Y), n)
     S1 = np.c_[np.ones(len(S)), S]
@@ -57,16 +59,13 @@ def inverse_lowess_std(X, Y, n=N, kernel=GAUSSIAN):
     wr = W @ rho
     std = np.sqrt(np.c_[[wr[c]/denom for c in list(wr)]])
 
-    # d = np.sqrt(np.sum(rho, axis=1))
-    # Wd = np.array([W[i, :] * d for i in range(W.shape[0])])
-    # avg_std = np.sqrt(np.c_[[Wd[c]/denom for c in list(wr)]])
     return std.T
 
 
 def inverse(X, Y, kernel=GAUSSIAN, scaler=None):
     S = np.linspace(np.amin(Y), np.amax(Y), N)
-    line = sample_lowess(S, Y, X, kernel)
-    std = inverse_lowess_std(X, Y, kernel=kernel)
+    line = inverse_lowess(X, Y, S, kernel)
+    std = inverse_lowess_std(X, Y, S, kernel=kernel)
 
     if scaler is not None:
         line = scaler.inverse_transform(line)

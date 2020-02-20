@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 from topopy.MorseSmaleComplex import MorseSmaleComplex
-import nglpy as ngl
+# import nglpy as ngl
 
 from regulus.topo.builder import Builder
 from regulus.topo import Regulus, Partition
