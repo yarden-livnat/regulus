@@ -40,17 +40,17 @@ def sample_lowess(S, X, Y, kernel=GAUSSIAN):
     return np.array([f(s) for s in S])
 
 
-def inverse_lowess(X, Y, S=None, n=N, kernel=GAUSSIAN):
+def inverse_lowess(X, Y, S=None, kernel=GAUSSIAN, n=N):
     if S is None:
         S = np.linspace(np.amin(Y), np.amax(Y), n)
     return sample_lowess(S, Y, X, kernel)  # note swap of X and Y
 
 
-def inverse_lowess_std(X, Y, n=N, S=None, kernel=GAUSSIAN):
+def inverse_lowess_std(X, Y, S=None, kernel=GAUSSIAN, n=N):
     if S is None:
         S = np.linspace(np.amin(Y), np.amax(Y), n)
     Y1 = np.c_[np.ones(len(Y)), Y]
-    S = np.linspace(np.amin(Y), np.amax(Y), n)
+    # S = np.linspace(np.amin(Y), np.amax(Y), n)
     S1 = np.c_[np.ones(len(S)), S]
     W = np.array([kernel(s, Y1) for s in S1])
     denom = W.sum(axis=1)
@@ -70,22 +70,29 @@ def inverse(X, Y, kernel=GAUSSIAN, scaler=None):
     if scaler is not None:
         line = scaler.inverse_transform(line)
         std = std * scaler.scale_
-    return S, line, std
+
+    # return S, line, std
+    index = pd.Index(S, name=Y.name)
+    curve = pd.DataFrame(line, index=index, columns=X.columns)
+    curve_std = pd.DataFrame(std, index=index, columns=X.columns)
+    return curve, curve_std
 
 
-def inverse_regression(kernel=GAUSSIAN, scale=True):
+def inverse_regression_generator(kernel=GAUSSIAN, bandwidth=0.3, scale=True):
     def f(context, node):
         partition = node.data
         if partition.y.size < 2:
             return []
 
+        sigma = bandwidth * (partition.max() - partition.min())
+        kernel = gaussian(sigma)
         scaler = node.regulus.pts.scaler if scale else None
         S, line, std = inverse(partition.x, partition.y, kernel, scaler)
         return [dict(x=line[:, c], y=S, std=std[:, c]) for c in range(partition.x.shape[1])]
     return f
 
 
-def default_inverse_regression(context, node):
+def inverse_regression(context, node):
     if hasattr(node, 'data'):
         partition = node.data
     else:
@@ -96,5 +103,6 @@ def default_inverse_regression(context, node):
     sigma = 0.3 * (partition.max() - partition.min())
     kernel = gaussian(sigma)
     scaler = node.regulus.pts.scaler
-    S, line, std = inverse(partition.x, partition.y, kernel, scaler)
-    return [dict(x=line[:, c], y=S, std=std[:, c]) for c in range(partition.x.shape[1])]
+    # S, line, std = inverse(partition.x, partition.y, kernel, scaler)
+    # return [dict(x=line[:, c], y=S, std=std[:, c]) for c in range(partition.x.shape[1])]
+    return inverse(partition.x, partition.y, kernel, scaler)

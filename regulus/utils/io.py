@@ -55,7 +55,7 @@ def add_defaults(regulus):
     regulus.add_attr(dim_parent_score)
     regulus.add_attr(dim_child_score)
 
-    regulus.add_attr(default_inverse_regression, name='inverse_regression')
+    regulus.add_attr(inverse_regression)
 
     regulus.tree.add_attr(parent_fitness, range=UNIT_RANGE)
     regulus.tree.add_attr(child_fitness, range=UNIT_RANGE)
