@@ -3,6 +3,7 @@ from sklearn.linear_model import  LinearRegression, Ridge
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import make_pipeline
 
+
 def quadratic_model(context, node):
     partition = node.data
     if partition.y.size < 2:
