@@ -38,6 +38,10 @@ def add_defaults(regulus):
     regulus.add_attr(linear_model, name='linear')
     regulus.add_attr(fitness, range=UNIT_RANGE)
     regulus.add_attr(relative_fitness, range=UNIT_RANGE)
+
+    regulus.add_attr(quadratic_model, name='quadratic')
+    regulus.add_attr(quadratic_fitness, name='quad_fitness', range=UNIT_RANGE)
+
     regulus.add_attr(stepwise_fitness)
     regulus.add_attr(node_min, name='min')
     regulus.add_attr(node_max, name='max')

@@ -103,6 +103,5 @@ def inverse_regression(context, node):
     sigma = 0.3 * (partition.max() - partition.min())
     kernel = gaussian(sigma)
     scaler = node.regulus.pts.scaler
-    # S, line, std = inverse(partition.x, partition.y, kernel, scaler)
-    # return [dict(x=line[:, c], y=S, std=std[:, c]) for c in range(partition.x.shape[1])]
+
     return inverse(partition.x, partition.y, kernel, scaler)
