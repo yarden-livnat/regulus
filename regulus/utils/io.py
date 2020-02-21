@@ -39,13 +39,10 @@ def add_defaults(regulus):
     regulus.add_attr(fitness, range=UNIT_RANGE)
     regulus.add_attr(relative_fitness, range=UNIT_RANGE)
 
-    regulus.add_attr(quadratic_model, name='quadratic')
-    regulus.add_attr(quadratic_fitness, name='quad_fitness', range=UNIT_RANGE)
-
     regulus.add_attr(stepwise_fitness)
 
     regulus.add_attr(quadratic_model, name='quadratic')
-    regulus.add_attr(quadratic_fitness, name='q_fitness')
+    regulus.add_attr(quadratic_fitness, name='q_fitness', range=UNIT_RANGE)
 
     regulus.add_attr(node_min, name='min')
     regulus.add_attr(node_max, name='max')
@@ -67,6 +64,7 @@ def add_defaults(regulus):
 
     regulus.tree.add_attr(parent_fitness, range=UNIT_RANGE)
     regulus.tree.add_attr(child_fitness, range=UNIT_RANGE)
+
     regulus.tree.add_attr(node_size, name='size')
     regulus.tree.add_attr(node_relative_size, name='rel_size', range=UNIT_RANGE)
     regulus.tree.add_attr(node_span, name='span', range=UNIT_RANGE)
