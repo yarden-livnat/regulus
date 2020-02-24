@@ -130,6 +130,8 @@ class RegulusTree(Tree, HasAttrs):
                 node.regulus = self.regulus
 
     def retrieve(self, name):
+        if name not in self.attr:
+            return None
         attr = self.attr[name]
         for node in self:
             attr.compute(node)  # ensure data is computed
@@ -173,7 +175,7 @@ class RegulusTree(Tree, HasAttrs):
         return self._persistence_levels
 
 
-class Regulus(HasAttrs, HasTree):
+class Regulus(HasTree, HasAttrs):
     def __init__(self, pts, pts_loc, measure, tree=None, type='smale'):
         super().__init__()
         self.type = type

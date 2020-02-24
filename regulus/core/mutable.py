@@ -5,6 +5,7 @@ class Mutable(HasTraits):
     version = Int(0)
 
     def invalidate(self):
-        self.version +=1
+        self.version += 1
+
 
 

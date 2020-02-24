@@ -1,40 +1,45 @@
-from traitlets import Bool, HasTraits, Instance, Set, This
+from traitlets import directional_link, HasTraits, TraitError, observe, validate, Int, Instance
 from .tree import Tree
+from .traittypes import TreeType
 
 
 class HasTree(HasTraits):
-    _tree = Instance(klass=Tree, allow_none=True)
-    _owner = This(allow_none=True)
+    tree = TreeType(allow_none=True)
 
-    def __init__(self, tree=None, **kwargs):
-        super().__init__(**kwargs)
-        self.tree = tree
+    def __init__(self, tree=None):
+        self._link = None
+        super().__init__()
+        if tree is not None:
+            self.tree = tree
 
-    @property
-    def tree(self):
-        return self._tree
+    @validate('tree')
+    def validate_tree(self, proposal):
+        print('>> HasTree validate tree', proposal)
+        src = proposal['value']
 
-    @tree.setter
-    def tree(self, src):
-        self.set(src)
+        if src == self.tree:
+            return
 
-    @property
-    def owner(self):
-        return self._owner
+        link = None
 
-    def set(self, src):
-        if self._owner is not None:
-            self._owner.unobserve(self.ref_tree_changed, names='_tree')
-        self.update(src)
-
-    def ref_tree_changed(self, change):
-        self.update(self._owner)
-
-    def update(self, src):
         if isinstance(src, Tree):
-            self._owner = None
-            self._tree = src
-        elif isinstance(src, HasTree):
-            self._owner = src
-            self._tree = src.tree
-            self._owner.observe(self.ref_tree_changed, names='_tree')
+            tree = src
+        elif isinstance(src, HasTraits) and src.has_trait('tree'):
+            tree = getattr(src, 'tree')
+            link = directional_link((src, 'tree'), (self, 'tree'))
+        elif hasattr(src, 'tree'):
+            tree = getattr(src, 'tree')
+        elif src is None:
+            tree = None
+        else:
+            raise TraitError('must be a tree or an owner of a tree')
+
+        if self._link is not None:
+            self._link.unlink()
+        self._link = link
+        print('<< HasTree validate tree')
+        return tree
+
+    # @observe('tree')
+    # def act(self, change):
+    #     print(f'HasTree received a new tree {change["new"]}')

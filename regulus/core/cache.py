@@ -42,6 +42,8 @@ class Cache(object):
             return None
         if isinstance(obj, tuple):
             return self.factory(self.context, *obj)
+        if self.context is None:
+            return self.factory(obj)
         return self.factory(self.context, obj)
 
     def clear(self):
