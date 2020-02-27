@@ -21,10 +21,10 @@ class ReduceTree(TransformTree):
     def _filter(self, change):
         old = change['old']
         if isinstance(old, Mutable):
-            old.unobserve(self._apply, names='version')
+            old.unobserve(self.apply, names='version')
 
         new = change['new']
         if isinstance(new, Mutable):
-            new.observe(self._apply, names='version')
+            new.observe(self.apply, names='version')
 
-        self._apply()
+        self.apply()

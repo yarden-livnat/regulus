@@ -54,6 +54,7 @@ class HasAttrs(HasTraits):
     state = Tuple(Unicode(), Unicode())
 
     def __init__(self, parent=None, auto=()):
+        super().__init__()
         range = None
         if parent is not None:
             range=parent.properties.get('range', None)

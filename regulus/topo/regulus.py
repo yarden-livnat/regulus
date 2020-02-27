@@ -92,16 +92,16 @@ class Partition(object):
 
 
 class RegulusTree(Tree, HasAttrs):
-    def __init__(self, regulus, root=None, auto=None):
+    def __init__(self, regulus, root=None, auto=None, parent=None):
         Tree.__init__(self, root)
-        HasAttrs.__init__(self, regulus.attr, auto or [])
+        HasAttrs.__init__(self, parent or regulus.attr, auto or [])
         self.regulus = regulus
         self._persistence_levels = None
         self._partitions = {}
         self.root = root
 
     def clone(self, root=None):
-        return RegulusTree(root=root, regulus=self.regulus, auto=self.auto)
+        return RegulusTree(regulus=self.regulus, root=root, auto=self.auto, parent=self.attr)
 
     @property
     def root(self):

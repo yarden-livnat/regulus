@@ -11,6 +11,7 @@ def linear_model(context, node):
     return model
 
 
+
 def model_of(klass, **kwargs):
     def _create(context, node):
         partition = node.data

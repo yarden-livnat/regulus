@@ -2,6 +2,7 @@ import numpy as np
 from sklearn import linear_model as lm
 from sklearn.metrics.pairwise import cosine_similarity
 
+
 def fitness(context, node):
     if len(node.data.y) < 2:
         return 0
