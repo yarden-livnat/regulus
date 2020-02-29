@@ -3,7 +3,6 @@ from regulus.core.traittypes import Function
 from regulus.core.mutable import Mutable
 from .tree import Tree
 from .traittypes import TreeType
-# from .hastree import HasTree
 
 
 class TransformTree(HasTraits):

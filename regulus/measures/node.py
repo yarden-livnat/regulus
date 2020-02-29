@@ -1,5 +1,6 @@
 import random
 
+
 def node_size(context, node):
     return node.data.size()
 
