@@ -28,3 +28,8 @@ class ReduceTree(TransformTree):
             new.observe(self.apply, names='version')
 
         self.apply()
+
+    # @observe('tree')
+    # def _tree_changed(self, change):
+    #     if self.filter is not None and hasattr(self.filter, 'update_range'):
+    #         self.filter.update_range(self.tree)
