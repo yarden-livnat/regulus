@@ -6,12 +6,12 @@ from sklearn.metrics.pairwise import cosine_similarity
 def fitness(context, node):
     if len(node.data.y) < 2:
         return 0
-    return context['linear'][node].score(node.data.x, node.data.y)
+    return context['model'][node].score(node.data.x, node.data.y)
 
 
 def stepwise_fitness(context, node):
     fitness = []
-    coefficients = np.fabs(context['linear'][node].coef_)
+    coefficients = np.fabs(context['model'][node].coef_)
     sorted_dims = np.argsort(coefficients)
     for i in range(len(sorted_dims)):
         subspace = sorted_dims[:(i+1)]
@@ -26,7 +26,7 @@ def stepwise_fitness(context, node):
 def relative_fitness(context, has_model, has_pts):
     if len(has_pts.data.y) < 2:
         return 0
-    return context['linear'][has_model].score(has_pts.data.x, has_pts.data.y)
+    return context['model'][has_model].score(has_pts.data.x, has_pts.data.y)
 
 
 def parent_fitness(context, node):
