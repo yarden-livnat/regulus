@@ -1,3 +1,4 @@
+from collections import defaultdict
 from traitlets import HasTraits, Tuple, Unicode
 from .cache import Cache
 
@@ -55,31 +56,27 @@ class HasAttrs(HasTraits):
 
     def __init__(self, parent=None, auto=()):
         super().__init__()
+        self.parent = parent
         range = None
         if parent is not None:
             range=parent.properties.get('range', None)
 
         self.attr = Cache(parent, factory=_dict, range=range)
         self.auto = []
+        self.dependencies = defaultdict(list)
         for entry in auto:
             self.add_attr(*entry)
 
-    # def _reset_attr(self, name):
-    #     if name in self.attrs:
-    #         s = set(self.attr)
-    #         s.remove(name)
-    #         self.attrs = s
-    #     s = set(self.attr)
-    #     s.add(name)
-    #     self.attrs = s
-
-    def add_attr(self, factory, name=None, key=_attr_key, range=None, save=True, **kwargs):
+    def add_attr(self, factory, name=None, key=_attr_key, range=None, dependson=(), save=True, **kwargs):
         """override previous attribute if one exists"""
         if name is None:
             if factory.__name__ == '<lambda>':
                 print('Error: a name must be given for a lambda expression')
                 return
             name = factory.__name__
+
+        for d in dependson:
+            self.dependencies[d].append(name)
 
         if range is None:
             range = AttrRange('auto')
@@ -90,6 +87,8 @@ class HasAttrs(HasTraits):
             op = 'change'
         self.attr[name] = Cache(key=key, factory=factory, context=self.attr, range=range, save=save, **kwargs)
         self.state = (op, name)
+
+        self.reset_dependents(name)
         # for i, entry in enumerate(self.auto):
         #     if entry[1] == name:
         #         self.auto[i] = [factory, name, key, range]
@@ -106,14 +105,27 @@ class HasAttrs(HasTraits):
         if name in self.attr:
             self.attr[name].factory = factory
             self.state = ('change', name)
+            self.reset_dependents(name)
         else:
             raise ValueError(f'Attribute {name} not found')
 
     def clear_attr(self, name):
         if name in self.attr:
             self.attr[name].clear()
+            self.state = ('change', name)
         else:
             raise ValueError(f'Attribute {name} not found')
+
+    def reset_dependents(self, name):
+        for d in self.dependencies[name]:
+            self.clear_attr(d)
+
+    def alias(self, new, old):
+        if old in self.attr:
+            self.attr[new] = self.attr[old]
+            self.reset_dependents(new)
+        else:
+            raise ValueError(f'Attribute {old} not found')
 
     def __contains__(self, attr):
         """check is attr in cache"""
