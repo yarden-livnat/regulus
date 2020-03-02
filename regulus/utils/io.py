@@ -36,8 +36,12 @@ def save(regulus, filename=None):
 
 def add_defaults(regulus):
     regulus.add_attr(linear_model, name='linear')
-    regulus.add_attr(fitness, range=UNIT_RANGE)
-    regulus.add_attr(relative_fitness, range=UNIT_RANGE)
+    regulus.add_attr(ridge_model, name='ridge')
+    # regulus.alias('model', 'ridge')
+    regulus.add_attr(ridge_model, name='model')
+
+    regulus.add_attr(fitness, range=UNIT_RANGE, dependson=['model'])
+    regulus.add_attr(relative_fitness, range=UNIT_RANGE, dependson=['model'])
 
     regulus.add_attr(stepwise_fitness)
 
@@ -62,8 +66,8 @@ def add_defaults(regulus):
 
     regulus.add_attr(inverse_regression)
 
-    regulus.tree.add_attr(parent_fitness, range=UNIT_RANGE)
-    regulus.tree.add_attr(child_fitness, range=UNIT_RANGE)
+    regulus.tree.add_attr(parent_fitness, range=UNIT_RANGE, dependson=['relative_fitness'])
+    regulus.tree.add_attr(child_fitness, range=UNIT_RANGE, dependson=['relative_fitness'])
 
     regulus.tree.add_attr(node_size, name='size')
     regulus.tree.add_attr(node_relative_size, name='rel_size', range=UNIT_RANGE)
