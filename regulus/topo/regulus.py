@@ -5,13 +5,15 @@ from regulus.core import HasAttrs
 
 class Partition(object):
     def __init__(self, id_, persistence, pts_span=None, minmax_idx=None, extrema=(), max_merge=False,
-                 base=None, regulus=None):
+                 base=0, regulus=None):
         self.id = id_
         self.regulus = regulus
         self.persistence = persistence
 
         self.pts_span = pts_span if pts_span is not None else [0, 0]
-        self.minmax_idx = minmax_idx if minmax_idx is not None else []
+        if minmax_idx is None or minmax_idx == []:
+            minmax_idx = [0, 0]
+        self.minmax_idx = minmax_idx
         self.extrema = list(extrema)
         self.max_merge = max_merge
         self.base = base
@@ -113,7 +115,8 @@ class RegulusTree(Tree, HasAttrs):
             if len(value) == 1:
                 value = value[0]
             else:
-                value = Node(ref=-1, data=Partition(-1, 1, pts_span=[0, self.regulus.pts.size()], regulus=self.regulus),
+                value = Node(ref=-1, data=Partition(-1, 1, pts_span=[0, self.regulus.pts.size()],
+                                                    regulus=self.regulus),
                              children=value, offset=0)
         self._root = value
         self.attr['data_size'] = self.regulus.pts.size()
