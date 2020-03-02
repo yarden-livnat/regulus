@@ -11,6 +11,15 @@ def linear_model(context, node):
     return model
 
 
+def ridge_model(context, node):
+    partition = node.data
+    if partition.y.size < 2:
+        return NullModel()
+    model = lm.Ridge(alpha=1.0)
+    model.fit(partition.x, partition.y)
+    return model
+
+
 
 def model_of(klass, **kwargs):
     def _create(context, node):
