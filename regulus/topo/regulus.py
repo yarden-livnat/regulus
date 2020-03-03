@@ -5,7 +5,7 @@ from regulus.core import HasAttrs
 
 class Partition(object):
     def __init__(self, id_, persistence, pts_span=None, minmax_idx=None, extrema=(), max_merge=False,
-                 base=0, regulus=None):
+                 base=None, regulus=None):
         self.id = id_
         self.regulus = regulus
         self.persistence = persistence
