@@ -1,7 +1,29 @@
+from wrapt import ObjectProxy
 
 
 def no_op(x):
     return x
+
+
+class ContextCache(ObjectProxy):
+    def __init__(self, cache, context):
+        super().__init__(cache)
+        self._self_context = context
+
+    def __getitem__(self, obj):
+        # print('context getitem')
+        key = self.key(obj)
+        if key not in self.cache:
+            if self.parent:
+                value, found = self.parent.get(key)
+                if found:
+                    if isinstance(value, Cache):
+                        return ContextCache(value, self._self_context)
+                    return value
+            if self.factory is None:
+                return None
+            self.cache[key] = self.eval(obj, self._self_context)
+        return self.cache[key]
 
 
 class Cache(object):
@@ -10,11 +32,13 @@ class Cache(object):
     def __init__(self, parent=None, key=None, factory=None, context=None, save=True, **kwargs):
         self.parent = parent
         self.factory = factory if not None else no_op
-        self.context = context
+        self.context = context if not None else self
         self.cache = dict()
         self.key = key if key is not None else no_op
         self.properties = kwargs
         self.save = save
+        if self.context is None:
+            self.context = self
 
     def __getitem__(self, obj):
         key = self.key(obj)
@@ -22,9 +46,14 @@ class Cache(object):
             if self.parent:
                 value, found = self.parent.get(key)
                 if found:
+                    if isinstance(value, Cache):
+                        return ContextCache(value, self.context)
                     return value
+            if self.factory is None:
+                return None
             self.cache[key] = self.eval(obj)
         return self.cache[key]
+
 
     def __setitem__(self, obj, value):
         key = self.key(obj)
@@ -37,14 +66,17 @@ class Cache(object):
             return self.parent.get(key)
         return [None, False]
 
-    def eval(self, obj):
+    def eval(self, obj, context=None):
+        # print('eval: ', id(self), id(context))
         if self.factory is None:
             return None
+        if context is None:
+            context = self.context
         if isinstance(obj, tuple):
-            return self.factory(self.context, *obj)
+            return self.factory(context, *obj)
         if self.context is None:
             return self.factory(obj)
-        return self.factory(self.context, obj)
+        return self.factory(context, obj)
 
     def clear(self):
         self.cache = {}
@@ -73,8 +105,9 @@ class Cache(object):
         """
         state = self.__dict__.copy()
         del state['factory']
-        state['factory_name'] = self.factory.__name__
-        state['factory_module'] = self.factory.__module__
+        if self.factory is not None:
+            state['factory_name'] = self.factory.__name__
+            state['factory_module'] = self.factory.__module__
         return state
 
     def __setstate__(self, state):

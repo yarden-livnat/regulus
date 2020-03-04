@@ -61,7 +61,7 @@ class HasAttrs(HasTraits):
         if parent is not None:
             range=parent.properties.get('range', None)
 
-        self.attr = Cache(parent, factory=_dict, range=range)
+        self.attr = Cache(parent, factory=None, range=range, context=None)
         self.auto = []
         self.dependencies = defaultdict(list)
         for entry in auto:
