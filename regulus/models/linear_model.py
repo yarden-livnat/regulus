@@ -20,6 +20,8 @@ def ridge_model(context, node):
     return model
 
 
+def shared_model(context, node):
+    return context['model'][node]
 
 def model_of(klass, **kwargs):
     def _create(context, node):

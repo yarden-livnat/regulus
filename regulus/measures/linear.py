@@ -41,6 +41,13 @@ def child_fitness(context, node):
     return context['relative_fitness'][node, node.parent]
 
 
+def shared_fitness(context, node):
+    model = context['shared_model'][node]
+    if model is None or len(node.data.y) < 2:
+        return 0
+    return model.score(node.data.x, node.data.y)
+
+
 def dim_scores(context, node):
     partition = node.data
     if partition.y.size < 2:

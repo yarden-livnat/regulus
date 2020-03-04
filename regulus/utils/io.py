@@ -39,9 +39,11 @@ def add_defaults(regulus):
     regulus.add_attr(ridge_model, name='ridge')
     # regulus.alias('model', 'ridge')
     regulus.add_attr(ridge_model, name='model')
+    regulus.add_attr(shared_model)
 
     regulus.add_attr(fitness, range=UNIT_RANGE, dependson=['model'])
     regulus.add_attr(relative_fitness, range=UNIT_RANGE, dependson=['model'])
+    regulus.add_attr(shared_fitness, range=UNIT_RANGE, dependson=['shared_model'])
 
     regulus.add_attr(stepwise_fitness)
 
