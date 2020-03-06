@@ -12,16 +12,16 @@ def linear_model(context, node):
 
 
 def ridge_model(context, node):
-    partition = node.data
-    if partition.y.size < 2:
+    if node.id < 0 or node.data.y.size < 2:
         return NullModel()
     model = lm.Ridge(alpha=1.0)
-    model.fit(partition.x, partition.y)
+    model.fit(node.data.x, node.data.y)
     return model
 
 
 def shared_model(context, node):
     return context['model'][node]
+
 
 def model_of(klass, **kwargs):
     def _create(context, node):

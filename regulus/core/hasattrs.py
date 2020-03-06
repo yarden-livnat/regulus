@@ -67,7 +67,7 @@ class HasAttrs(HasTraits):
         for entry in auto:
             self.add_attr(*entry)
 
-    def add_attr(self, factory, name=None, key=_attr_key, range=None, dependson=(), save=True, **kwargs):
+    def add_attr(self, factory, name=None, key=_attr_key, range=None, requires=(), save=True, **kwargs):
         """override previous attribute if one exists"""
         if name is None:
             if factory.__name__ == '<lambda>':
@@ -75,7 +75,7 @@ class HasAttrs(HasTraits):
                 return
             name = factory.__name__
 
-        for d in dependson:
+        for d in requires:
             self.dependencies[d].append(name)
 
         if range is None:
