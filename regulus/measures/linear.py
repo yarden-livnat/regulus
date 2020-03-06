@@ -2,6 +2,7 @@ import numpy as np
 from sklearn import linear_model as lm
 from sklearn.metrics.pairwise import cosine_similarity
 
+from ..models import NullModel
 
 def fitness(context, node):
     if len(node.data.y) < 2:
@@ -46,6 +47,25 @@ def shared_fitness(context, node):
     if model is None or len(node.data.y) < 2:
         return 0
     return model.score(node.data.x, node.data.y)
+
+
+def coef_change(context, node):
+    if node.id < 0 or node.parent.id < 0:
+        return 0
+
+    n_coef = context['model'][node].coef_
+    p_coef = context['model'][node.parent].coef_
+    # print(f'similarity: {node.id} {node.parent.id}  {len(n_coef)} {len(p_coef)}')
+    if len(n_coef) == len(p_coef) :
+        return cosine_similarity([n_coef], [p_coef])[[0][0]][0]
+    return 0
+
+
+def coef_similarity(context, node):
+    n_coef = context['model'][node].coef_
+    s_coef = context['shared_model'][node].coef_
+    if len(n_coef) == len(s_coef):
+        return cosine_similarity([n_coef], [s_coef])[[0][0]][0]
 
 
 def dim_scores(context, node):
