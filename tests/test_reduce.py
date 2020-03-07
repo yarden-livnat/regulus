@@ -1,25 +1,47 @@
 import regulus
 
 
-def stat(tree):
-    for node, depth in regulus.traverse(tree.root, depth=True):
-        print('.'*depth,node.id)
+def test(t1, t2):
+    print('=== test 1')
+    n1 = t1.find_id(64)
+    a1 = t1.attr[attr][n1]
+    print('a1', a1)
 
-def f(c, n):
-    attr = c.attr['fitness']
-    value = attr[n]
-    return value > 0.4
+    print('==== test 2')
+    n2 = t2.find_id(64)
+    a2 = t2.attr[attr][n2]
+    print('a2', a2)
 
 
-gauss = regulus.load('gauss4')
-tree = gauss.tree
+compute = True
 
-print('original')
-stat(tree)
+if compute:
+    data = regulus.from_csv('gauss4', knn=8)
+else:
+    data = regulus.load('gauss4')
 
-s = regulus.SimplifiedTree(tree, f)
+t1 = data.tree
 
-print('reduced')
-stat(s.tree)
+rt = regulus.ReduceTree(filter=lambda context, node: node.parent.data.persistence - node.data.persistence > 0.15)
+rt.src = t1
+t2 = rt.tree
+
+print('-----')
+print('t1 id:', id(t1))
+print('t2 id:', id(t2))
+print('-----')
+
+print(f't1: {t1.size()}  t2: {t2.size()}')
+
+print(f't1 parent: {t1.find_id(64).parent.id}')
+
+print(f't2 parent: {t2.find_id(64).parent.id}')
+
+attr = 'child_fitness'
+
+# test(t1, t2)
+test(t2, t1)
+
+
 
 

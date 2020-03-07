@@ -29,18 +29,20 @@ class ContextCache(ObjectProxy):
 class Cache(object):
     _counter = 0
 
-    def __init__(self, parent=None, key=None, factory=None, context=None, save=True, **kwargs):
+    def __init__(self, parent=None, key=None, factory=None, dynamic=False, context=None, save=True, **kwargs):
         self.parent = parent
         self.factory = factory if not None else no_op
         self.context = context if not None else self
         self.cache = dict()
         self.key = key if key is not None else no_op
+        self.dynamic = dynamic
         self.properties = kwargs
         self.save = save
         if self.context is None:
             self.context = self
 
     def __getitem__(self, obj):
+        # print(f'Cache: id: {id(self)}  context: {id(self.context)}')
         key = self.key(obj)
         if key not in self.cache:
             if self.parent:
@@ -53,7 +55,6 @@ class Cache(object):
                 return None
             self.cache[key] = self.eval(obj)
         return self.cache[key]
-
 
     def __setitem__(self, obj, value):
         key = self.key(obj)

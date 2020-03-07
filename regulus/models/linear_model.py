@@ -35,10 +35,10 @@ def model_of(klass, **kwargs):
     return _create
 
 
-def dim_models(context, node):
+def dim_model(context, node):
     partition = node.data
     if partition.y.size < 2:
         return [NullModel() for d in partition.x.columns]
 
-    models = [lm.LinearRegression().fit(partition.x[[d]], partition.y) for d in partition.x.columns]
+    models = [lm.Ridge().fit(partition.x[[d]], partition.y) for d in partition.x.columns]
     return models

@@ -8,6 +8,7 @@ from regulus.topo import msc, Regulus
 from regulus.measures import *
 from regulus.models import *
 from regulus.core import UNIT_RANGE
+from regulus.alg import *
 
 
 def load(filename):
@@ -40,7 +41,6 @@ def add_defaults(regulus):
     # models
     regulus.add_attr(linear_model, name='linear')
     regulus.add_attr(ridge_model, name='ridge')
-    # regulus.alias('model', 'ridge')
     regulus.add_attr(ridge_model, name='model')
     regulus.add_attr(shared_model)
 
@@ -60,28 +60,27 @@ def add_defaults(regulus):
     regulus.add_attr(shared_fitness, range=UNIT_RANGE, requires=['shared_model'])
     regulus.add_attr(stepwise_fitness)
 
-
     # dims approach
-    regulus.add_attr(dim_models)
+    regulus.add_attr(dim_model)
 
-    regulus.add_attr(dim_scores)
-    regulus.add_attr(dim_min_fitness)
-    regulus.add_attr(dim_max_fitness)
-    regulus.add_attr(relative_dim_score)
-    regulus.add_attr(dim_parent_score)
-    regulus.add_attr(dim_child_score)
+    regulus.add_attr(dim_score, requires=['dim_model'])
+    regulus.add_attr(dim_min, requires=['dim_score'])
+    regulus.add_attr(dim_max, requires=['dim_score'])
+    regulus.add_attr(dim_relative, dynamic=True, requires=['dim_model'])
+    regulus.add_attr(dim_parent, dynamic=True, requires=['dim_score', 'dim_relative'])
+    regulus.add_attr(dim_child, dynamic=True, requires=['dim_score', 'dim_relative'])
 
     # tree base metrics
-    regulus.tree.add_attr(parent_fitness, range=UNIT_RANGE, requires=['relative_fitness'])
-    regulus.tree.add_attr(child_fitness, range=UNIT_RANGE, requires=['relative_fitness'])
+    regulus.tree.add_attr(parent_fitness, range=UNIT_RANGE, requires=['relative_fitness'], dynamic=True)
+    regulus.tree.add_attr(child_fitness, range=UNIT_RANGE, requires=['relative_fitness'], dynamic=True)
 
     regulus.tree.add_attr(node_size, name='size')
     regulus.tree.add_attr(node_relative_size, name='rel_size', range=UNIT_RANGE)
-    regulus.tree.add_attr(node_span, name='span', range=UNIT_RANGE)
+    regulus.tree.add_attr(node_span, name='span', range=UNIT_RANGE, dynamic=True)
 
     # coef
-    regulus.add_attr(coef_change, range=UNIT_RANGE)
-    regulus.add_attr(coef_similarity, range=UNIT_RANGE, requires=['shared_model'])
+    regulus.add_attr(coef_change, range=UNIT_RANGE, dynamic=True, requires=['model'])
+    regulus.add_attr(coef_similarity, range=UNIT_RANGE, requires=['model', 'shared_model'])
 
 
 def from_csv(filename, **kwargs):

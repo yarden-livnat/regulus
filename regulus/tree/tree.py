@@ -89,14 +89,14 @@ class Tree(object):
                     _depth = d
         return _depth
 
-    def reduce(self, keep, factory=Node):
+    def reduce(self, f, factory=Node):
         def _reduce(node, offset):
             children = []
             child_offset = offset
             for child in node.children:
                 children.extend(_reduce(child, child_offset))
                 child_offset += child.data.size()
-            if keep(self, node):
+            if f(self, node):
                 return [factory(data=node.data, children=children, offset=offset)]
             else:
                 return children

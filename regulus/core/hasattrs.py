@@ -50,24 +50,50 @@ def _wrap_factory(context, func):
     return wrapper
 
 
+class HasAttrCache(Cache):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.context = self
+
+    def __getitem__(self, obj):
+        # print(f'HasAttrCache: id: {id(self)}  context: {id(self.context)}' )
+        key = _attr_key(obj)
+        value = None
+        if key in self.cache:
+            return self.cache[key]
+
+        if self.parent:
+            value, found = self.parent.get(key)
+            if found:
+                if isinstance(value, Cache) and value.dynamic:
+                    value = Cache(key=value.key, factory=value.factory, dynamic=True,
+                                  context=self.context, save=value.save, **value.properties)
+                    self.cache[key] = value
+                return value
+        self.cache[key] = dict()
+        return self.cache[key]
+
+
 class HasAttrs(HasTraits):
 
     state = Tuple(Unicode(), Unicode())
 
     def __init__(self, parent=None, auto=()):
         super().__init__()
+        # print('HasAttrs', id(self))
         self.parent = parent
         range = None
         if parent is not None:
             range=parent.properties.get('range', None)
 
-        self.attr = Cache(parent, factory=None, range=range, context=None)
+        # self.attr = Cache(parent, factory=None, range=range, context=None)
+        self.attr = HasAttrCache(parent)
         self.auto = []
         self.dependencies = defaultdict(list)
         for entry in auto:
             self.add_attr(*entry)
 
-    def add_attr(self, factory, name=None, key=_attr_key, range=None, requires=(), save=True, **kwargs):
+    def add_attr(self, factory, name=None, dynamic=False, key=_attr_key, range=None, requires=(), save=True, **kwargs):
         """override previous attribute if one exists"""
         if name is None:
             if factory.__name__ == '<lambda>':
@@ -85,7 +111,7 @@ class HasAttrs(HasTraits):
             op = 'add'
         else:
             op = 'change'
-        self.attr[name] = Cache(key=key, factory=factory, context=self.attr, range=range, save=save, **kwargs)
+        self.attr[name] = Cache(key=key, factory=factory, dynamic=dynamic, context=self.attr, range=range, save=save, **kwargs)
         self.state = (op, name)
 
         self.reset_dependents(name)

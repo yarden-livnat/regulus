@@ -50,7 +50,6 @@ def inverse_lowess_std(X, Y, S=None, kernel=GAUSSIAN, n=N):
     if S is None:
         S = np.linspace(np.amin(Y), np.amax(Y), n)
     Y1 = np.c_[np.ones(len(Y)), Y]
-    # S = np.linspace(np.amin(Y), np.amax(Y), n)
     S1 = np.c_[np.ones(len(S)), S]
     W = np.array([kernel(s, Y1) for s in S1])
     denom = W.sum(axis=1)
@@ -62,8 +61,9 @@ def inverse_lowess_std(X, Y, S=None, kernel=GAUSSIAN, n=N):
     return std.T
 
 
-def inverse(X, Y, kernel=GAUSSIAN, scaler=None):
-    S = np.linspace(np.amin(Y), np.amax(Y), N)
+def inverse(X, Y, kernel=GAUSSIAN, S=None, scaler=None):
+    if S is None:
+        S = np.linspace(np.amin(Y), np.amax(Y), N)
     line = inverse_lowess(X, Y, S, kernel)
     std = inverse_lowess_std(X, Y, S, kernel=kernel)
 
@@ -78,18 +78,18 @@ def inverse(X, Y, kernel=GAUSSIAN, scaler=None):
     return curve, curve_std
 
 
-def inverse_regression_generator(kernel=GAUSSIAN, bandwidth=0.3, scale=True):
-    def f(context, node):
-        partition = node.data
-        if partition.y.size < 2:
-            return []
-
-        sigma = bandwidth * (partition.max() - partition.min())
-        kernel = gaussian(sigma)
-        scaler = node.regulus.pts.scaler if scale else None
-        S, line, std = inverse(partition.x, partition.y, kernel, scaler)
-        return [dict(x=line[:, c], y=S, std=std[:, c]) for c in range(partition.x.shape[1])]
-    return f
+# def inverse_regression_generator(kernel=GAUSSIAN, bandwidth=0.3, scale=True):
+#     def f(context, node):
+#         partition = node.data
+#         if partition.y.size < 2:
+#             return []
+#
+#         sigma = bandwidth * (partition.max() - partition.min())
+#         kernel = gaussian(sigma)
+#         scaler = node.regulus.pts.scaler if scale else None
+#         S, line, std = inverse(partition.x, partition.y, kernel, scaler)
+#         return [dict(x=line[:, c], y=S, std=std[:, c]) for c in range(partition.x.shape[1])]
+#     return f
 
 
 def inverse_regression(context, node):
@@ -100,8 +100,11 @@ def inverse_regression(context, node):
     if partition.y.size < 2:
         return []
 
-    sigma = 0.3 * (partition.max() - partition.min())
+    sigma = 0.2 * (partition.max() - partition.min())
     kernel = gaussian(sigma)
     scaler = node.regulus.pts.scaler
 
-    return inverse(partition.x, partition.y, kernel, scaler)
+    data_range = context['data_range']
+    S = np.linspace(*data_range, N)
+    S1 = S[(S >= np.amin(partition.y)) & (S <= np.amax(partition.y))]
+    return inverse(partition.x, partition.y, kernel, S1, scaler )

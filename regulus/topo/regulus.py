@@ -119,7 +119,8 @@ class RegulusTree(Tree, HasAttrs):
                                                     regulus=self.regulus),
                              children=value, offset=0)
         self._root = value
-        self.attr['data_size'] = self.regulus.pts.size()
+        # self.attr['data_size'] = self.regulus.pts.size()
+        # self.attr['data_range'] = [min(self.regulus.y), max(self.regulus.y)]
         if value is not None and value.parent is None:
             sentinal = Node(ref=-1, data=Partition(-1, 1, regulus=self.regulus),
                             children=[value], offset=0)
@@ -187,6 +188,8 @@ class Regulus(HasTree, HasAttrs):
         self.pts_loc = pts_loc
         self.measure = measure
         self.y = pts.y(measure)
+        self.attr['data_size'] = self.pts.size()
+        self.attr['data_range'] = [min(self.y), max(self.y)]
         self.tree = tree if tree is not None else RegulusTree(regulus=self)
 
     @property
