@@ -64,6 +64,9 @@ def inverse_lowess_std(X, Y, S=None, kernel=GAUSSIAN, n=N):
 def inverse(X, Y, kernel=GAUSSIAN, S=None, scaler=None):
     if S is None:
         S = np.linspace(np.amin(Y), np.amax(Y), N)
+    if len(S) < 2:
+        return pd.DataFrame(columns=X.columns), pd.DataFrame(columns=X.columns)
+
     line = inverse_lowess(X, Y, S, kernel)
     std = inverse_lowess_std(X, Y, S, kernel=kernel)
 
@@ -107,4 +110,5 @@ def inverse_regression(context, node):
     data_range = context['data_range']
     S = np.linspace(*data_range, N)
     S1 = S[(S >= np.amin(partition.y)) & (S <= np.amax(partition.y))]
+
     return inverse(partition.x, partition.y, kernel, S1, scaler )

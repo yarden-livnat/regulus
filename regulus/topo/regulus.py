@@ -139,6 +139,9 @@ class RegulusTree(Tree, HasAttrs):
         attr = self.attr[name]
         for node in self:
             attr.compute(node)  # ensure data is computed
+        if 'range' in attr.properties:
+            r = attr.properties['range']
+            r.update(self, name)
         return attr.cache
 
     def iter_attr(self, attr):

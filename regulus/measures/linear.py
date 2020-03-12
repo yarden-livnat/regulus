@@ -4,7 +4,7 @@ from sklearn import linear_model as lm
 
 def fitness(context, node):
     if len(node.data.y) < 2:
-        return 0
+        return None
     return context['model'][node].score(node.data.x, node.data.y)
 
 
@@ -30,20 +30,20 @@ def relative_fitness(context, has_model, has_pts):
 
 def parent_fitness(context, node):
     if node.id == -1 or node.parent.id == -1:
-        return 0
+        return None
     return context['relative_fitness'][node.parent, node]
 
 
 def child_fitness(context, node):
     if node.id == -1 or node.parent.id == -1:
-        return 0
+        return None
     return context['relative_fitness'][node, node.parent]
 
 
 def shared_fitness(context, node):
     model = context['shared_model'][node]
     if model is None or len(node.data.y) < 2:
-        return 0
+        return None
     return model.score(node.data.x, node.data.y)
 
 

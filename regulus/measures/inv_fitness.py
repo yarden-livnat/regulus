@@ -1,14 +1,13 @@
 
 
-# def relative_inverse(context, n1, n2):
-#     if len(n1.data.y) < 2:
-#         return 0
-#
-#     curves = context['inverse_regression']
-#     curve1 = curves[n1]
-#     curve2 = curves[n2]
-#
-#     l1 = len(curve1)
-#     l2 = len(curve2)
-#
-#     return
+def inv_fitness(t,n):
+    p = n.parent
+    if n.id == -1 or p.id == -1:
+        return None
+    if len(n.data.y) < 10 or len(p.data.y) < 10:
+        return None
+    nc = t['inverse_regression'][n][0]
+    pc = t['inverse_regression'][p][0]
+    d = (pc-nc).dropna()
+    d2 = (d*d).sum()/len(d)
+    return -d2.max()

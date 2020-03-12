@@ -4,13 +4,15 @@ from .cache import Cache
 
 
 def minmax(obj):
-    items = iter(obj)
-    min = max = next(items)
-    for item in items:
-        if item < min:
-            min = item
-        elif item > max:
-            max = item
+    min = max = None
+    for item in iter(obj):
+        if item is not None:
+            if min is None:
+                min = max = item
+            elif item < min:
+                min = item
+            elif item > max:
+                max = item
     return min, max
 
 

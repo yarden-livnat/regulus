@@ -82,6 +82,10 @@ def add_defaults(regulus):
     regulus.add_attr(coef_change, range=UNIT_RANGE, dynamic=True, requires=['model'])
     regulus.add_attr(coef_similarity, range=UNIT_RANGE, requires=['model', 'shared_model'])
 
+    # inv fitness
+    regulus.add_attr(inv_fitness, dynamic=True, requires=['inverse_regression'])
+
+
 
 def from_csv(filename, **kwargs):
     path = Path(filename)
