@@ -95,6 +95,27 @@ def inverse(X, Y, kernel=GAUSSIAN, S=None, scaler=None):
 #     return f
 
 
+def def_inverse(bandwidth_factor=0.2):
+    def f(context, node):
+        if hasattr(node, 'data'):
+            partition = node.data
+        else:
+            partition = node
+        if partition.y.size < 2:
+            return []
+
+        sigma = bandwidth_factor * (partition.max() - partition.min())
+        kernel = gaussian(sigma)
+        scaler = node.regulus.pts.scaler
+
+        data_range = context['data_range']
+        S = np.linspace(*data_range, N)
+        S1 = S[(S >= np.amin(partition.y)) & (S <= np.amax(partition.y))]
+        return inverse(partition.x, partition.y, kernel, S1, scaler)
+
+    return f
+
+
 def inverse_regression(context, node):
     if hasattr(node, 'data'):
         partition = node.data
