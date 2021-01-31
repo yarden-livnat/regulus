@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 from topopy.MorseSmaleComplex import MorseSmaleComplex
-# import nglpy as ngl
+import nglpy as ngl
 
 from regulus.topo.builder import Builder
 from regulus.topo import Regulus, Partition
@@ -12,13 +12,12 @@ defaults = SimpleNamespace(
         norm=None,
         graph='relaxed beta skeleton',
         gradient='steepest',
-        aggregator=None,
-        connect=False
+        aggregator=None
 )
 
 
 def msc(data, kind='smale', measure=None, knn=defaults.knn, beta=defaults.beta, norm=defaults.norm,
-        graph=defaults.graph, gradient=defaults.gradient, aggregator=defaults.aggregator, connect=defaults.connect,
+        graph=defaults.graph, gradient=defaults.gradient, aggregator=defaults.aggregator,
         debug=False):
     """Compute a Morse-Smale Complex"""
 
@@ -38,15 +37,15 @@ def msc(data, kind='smale', measure=None, knn=defaults.knn, beta=defaults.beta, 
 
     y = data.values.loc[:, measure]
 
-    topo = MorseSmaleComplex(graph=graph, gradient=gradient, max_neighbors=knn, beta=beta,
-                             normalization=norm, aggregator=aggregator, connect=connect)
-    # topopy ver 1.0: remove names
-    # topo.build(X=data.x.values, Y=y.values, names=list(data.x.columns)+[y.name])
+    if 'knn' in graph:
+        beta=0.0
+        relaxed = True
+    else:
+        relaxed = 'relaxed' in graph
+        
+    ngl_graph = ngl.EmptyRegionGraph(max_neighbors=knn, relaxed=relaxed, beta=beta, p=2.0)    
+    topo = MorseSmaleComplex(graph=ngl_graph, gradient=gradient, normalization=norm, aggregator=aggregator)
     topo.build(X=data.x.values, Y=y.values)
-
-    # topopy version 1.0.0
-    # graph = ngl.EmptyRegionGraph(beta=beta, relaxed=False, p=2.0)
-    # topo = MorseSmaleComplex(graph=graph, gradient=gradient, normalization=norm, aggregator=aggregator)
 
     builder = Builder(debug).data(y)
 

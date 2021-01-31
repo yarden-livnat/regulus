@@ -1,5 +1,6 @@
 numpy
 pandas
 sklearn
-topopy
+nglpy>=1.0.6,<2.0
+topopy>=1.0,<2.0
 traitlets

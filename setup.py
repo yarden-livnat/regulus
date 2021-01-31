@@ -39,7 +39,7 @@ setup(
     zip_safe=False,
     packages=find_packages(exclude=('tests', 'docs')),
     install_requires=[
-        'topopy=0.1', 'numpy', 'sklearn', 'pandas'
+        'nglpy>=1.0.6,<2.0', 'topopy>=1.0,<2.0', 'numpy', 'sklearn', 'pandas'
     ],
     test_suite='nose.collector',
     tests_require=['nose'],
